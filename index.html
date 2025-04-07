@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,167 +9,259 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-     <style>
-      @font-face {
-        font-family: 'LucideIcons';
-        src: url(https://cdn.jsdelivr.net/npm/lucide-static@latest/font/Lucide.ttf) format('truetype');
-      }
-      .lucide {
-        font-family: 'LucideIcons';
-        font-size: 1.1rem;
-        line-height: 1;
-        display: inline-block;
-        vertical-align: middle;
-      }
-      body {
-        font-family: 'Inter', sans-serif;
-        background-color: #f8fafc; /* slate-50 */
-      }
-      .section-card {
-          background-color: white;
-          border-radius: 0.5rem;
-          padding: 1.5rem;
-          box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-          margin-bottom: 2rem;
-      }
-      .visualization-box {
-          border: 1px solid #e2e8f0;
-          background-color: #f8fafc;
-          border-radius: 0.375rem;
-          position: relative;
-          overflow: hidden;
-          margin-bottom: 1rem;
-      }
-      .trace-canvas {
-          display: block;
-          width: 100%;
-          height: 1050px;
-          border: 1px solid #e2e8f0;
-          border-radius: 0.25rem;
-      }
-       #comparison-graph-canvas {
-           display: block;
-           width: 100%;
-           height: 400px;
-           border: 1px solid #e2e8f0;
-           border-radius: 0.25rem;
-           background-color: #f8fafc;
-       }
-      .canvas-container {
-          position: relative;
-          width: 100%;
-          max-width: 800px;
-          margin-left: auto;
-          margin-right: auto;
-          padding-bottom: 25px;
-      }
-       .comparison-container {
-           width: 100%;
-           max-width: 900px;
-           margin: 2rem auto 0 auto;
-       }
-      .axis-label {
-          position: absolute;
-          font-size: 0.75rem;
-          color: #475569;
-          white-space: nowrap;
-      }
-      .y-axis-label {
-          position: absolute;
-          top: 50%;
-          left: 10px;
-          transform: translateY(-50%) rotate(-90deg);
-          transform-origin: left center;
-      }
-       .x-axis-label {
-          position: absolute;
-          bottom: 5px;
-          left: 50%;
-          transform: translateX(-50%);
-      }
-      .trace-grid {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 2.5rem;
-          width: 100%;
-      }
-      .trace-item {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          width: 100%;
-      }
-      .trace-item h3 {
-          font-size: 1.125rem;
-          font-weight: 600;
-          color: #1e293b;
-          margin-bottom: 0.75rem;
-          text-align: center;
-      }
-      input[type="number"], input[type="text"], select {
-          border-color: #cbd5e1;
-          border-radius: 0.375rem;
-          padding: 0.5rem 0.75rem;
-          transition: border-color 0.2s ease, box-shadow 0.2s ease;
-      }
-      input[type="number"]:focus, input[type="text"]:focus, select:focus {
-          outline: none;
-          border-color: #4f46e5;
-          box-shadow: 0 0 0 2px #c7d2fe;
-      }
-      .btn {
-          display: inline-flex;
-          align-items: center;
-          gap: 0.5rem;
-          padding: 0.625rem 1.25rem;
-          border-radius: 0.375rem;
-          font-weight: 500;
-          transition: background-color 0.2s ease;
-          cursor: pointer;
-          border: 1px solid transparent;
-      }
-      .btn-primary { background-color: #4f46e5; color: white; }
-      .btn-primary:hover { background-color: #4338ca; }
-      .btn-secondary { background-color: #e2e8f0; color: #1e293b; border-color: #cbd5e1; }
-      .btn-secondary:hover { background-color: #cbd5e1; }
-      .btn-indigo { background-color: #6366f1; color: white; }
-      .btn-indigo:hover { background-color: #4f46e5; }
-      .btn-lg { padding: 0.75rem 1.5rem; font-size: 1rem; }
-      .metric-button {
-           padding: 0.5rem 1rem; border: 1px solid #cbd5e1; border-radius: 0.375rem; background-color: white; color: #334155; font-weight: 500; cursor: pointer; transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
-       }
-       .metric-button.active { background-color: #6366f1; color: white; border-color: #6366f1; }
-       .metric-button:hover:not(.active) { background-color: #f1f5f9; }
-       h1, h2 { color: #1e293b; }
-       label { color: #334155; font-weight: 500; }
-       p { color: #475569; }
-       /* --- Table Styling --- */
-       .comparison-table {
-           width: 100%;
-           margin-top: 1.5rem; /* mt-6 */
-           border-collapse: collapse;
-           font-size: 0.875rem; /* text-sm */
-       }
-       .comparison-table th, .comparison-table td {
-           border: 1px solid #e2e8f0; /* slate-200 */
-           padding: 0.75rem; /* p-3 */
-           text-align: left;
-       }
-       .comparison-table th {
-           background-color: #f1f5f9; /* slate-100 */
-           font-weight: 600; /* font-semibold */
-           color: #334155; /* slate-700 */
-       }
-       .comparison-table tbody tr:nth-child(even) {
-           background-color: #f8fafc; /* slate-50 */
-       }
-       .comparison-table td:not(:first-child) {
-           text-align: right; /* Align numbers to the right */
-           font-family: monospace; /* Monospace font for numbers */
-       }
+    <style>
+        @font-face {
+            font-family: 'LucideIcons';
+            src: url(https://cdn.jsdelivr.net/npm/lucide-static@latest/font/Lucide.ttf) format('truetype');
+        }
+
+        .lucide {
+            font-family: 'LucideIcons';
+            font-size: 1.1rem;
+            line-height: 1;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            /* slate-50 */
+        }
+
+        .section-card {
+            background-color: white;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .visualization-box {
+            border: 1px solid #e2e8f0;
+            background-color: #f8fafc;
+            border-radius: 0.375rem;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .trace-canvas {
+            display: block;
+            width: 100%;
+            height: 1050px;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.25rem;
+        }
+
+        #comparison-graph-canvas {
+            display: block;
+            width: 100%;
+            height: 400px;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.25rem;
+            background-color: #f8fafc;
+        }
+
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            padding-bottom: 25px;
+        }
+
+        .comparison-container {
+            width: 100%;
+            max-width: 900px;
+            margin: 2rem auto 0 auto;
+        }
+
+        .axis-label {
+            position: absolute;
+            font-size: 0.75rem;
+            color: #475569;
+            white-space: nowrap;
+        }
+
+        .y-axis-label {
+            position: absolute;
+            top: 50%;
+            left: 10px;
+            transform: translateY(-50%) rotate(-90deg);
+            transform-origin: left center;
+        }
+
+        .x-axis-label {
+            position: absolute;
+            bottom: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .trace-grid {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2.5rem;
+            width: 100%;
+        }
+
+        .trace-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        .trace-item h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 0.75rem;
+            text-align: center;
+        }
+
+        input[type="number"],
+        input[type="text"],
+        select {
+            border-color: #cbd5e1;
+            border-radius: 0.375rem;
+            padding: 0.5rem 0.75rem;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        input[type="number"]:focus,
+        input[type="text"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 2px #c7d2fe;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.625rem 1.25rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            transition: background-color 0.2s ease;
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+
+        .btn-primary {
+            background-color: #4f46e5;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #4338ca;
+        }
+
+        .btn-secondary {
+            background-color: #e2e8f0;
+            color: #1e293b;
+            border-color: #cbd5e1;
+        }
+
+        .btn-secondary:hover {
+            background-color: #cbd5e1;
+        }
+
+        .btn-indigo {
+            background-color: #6366f1;
+            color: white;
+        }
+
+        .btn-indigo:hover {
+            background-color: #4f46e5;
+        }
+
+        .btn-lg {
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+        }
+
+        .metric-button {
+            padding: 0.5rem 1rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 0.375rem;
+            background-color: white;
+            color: #334155;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+        }
+
+        .metric-button.active {
+            background-color: #6366f1;
+            color: white;
+            border-color: #6366f1;
+        }
+
+        .metric-button:hover:not(.active) {
+            background-color: #f1f5f9;
+        }
+
+        h1,
+        h2 {
+            color: #1e293b;
+        }
+
+        label {
+            color: #334155;
+            font-weight: 500;
+        }
+
+        p {
+            color: #475569;
+        }
+
+        /* --- Table Styling --- */
+        .comparison-table {
+            width: 100%;
+            margin-top: 1.5rem;
+            /* mt-6 */
+            border-collapse: collapse;
+            font-size: 0.875rem;
+            /* text-sm */
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            border: 1px solid #e2e8f0;
+            /* slate-200 */
+            padding: 0.75rem;
+            /* p-3 */
+            text-align: left;
+        }
+
+        .comparison-table th {
+            background-color: #f1f5f9;
+            /* slate-100 */
+            font-weight: 600;
+            /* font-semibold */
+            color: #334155;
+            /* slate-700 */
+        }
+
+        .comparison-table tbody tr:nth-child(even) {
+            background-color: #f8fafc;
+            /* slate-50 */
+        }
+
+        .comparison-table td:not(:first-child) {
+            text-align: right;
+            /* Align numbers to the right */
+            font-family: monospace;
+            /* Monospace font for numbers */
+        }
     </style>
 </head>
+
 <body class="bg-slate-50 font-sans p-4 md:p-8 flex flex-col items-center min-h-screen">
 
     <div class="w-full max-w-7xl mx-auto">
@@ -177,64 +270,81 @@
         <div class="section-card">
             <h2 class="text-xl font-semibold text-slate-700 mb-4 text-center">Configuration</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                <div class="flex flex-col gap-1"> <label for="algorithm-select">Algorithm (for Details)</label> <select id="algorithm-select"> <option value="FCFS">FCFS</option> <option value="SSTF">SSTF</option> <option value="SCAN">SCAN</option> <option value="C-SCAN">C-SCAN</option> <option value="LOOK">LOOK</option> <option value="C-LOOK">C-LOOK</option> </select> </div>
-                <div class="flex flex-col gap-1"> <label for="start-head">Start Head Position</label> <input type="number" id="start-head" value="50"> </div>
-                <div class="flex flex-col gap-1"> <label for="max-cylinder">Max Cylinder</label> <input type="number" id="max-cylinder" value="500"> </div>
+                <div class="flex flex-col gap-1"> <label for="algorithm-select">Algorithm (for Details)</label> <select
+                        id="algorithm-select">
+                        <option value="FCFS">FCFS</option>
+                        <option value="SSTF">SSTF</option>
+                        <option value="SCAN">SCAN</option>
+                        <option value="C-SCAN">C-SCAN</option>
+                        <option value="LOOK">LOOK</option>
+                        <option value="C-LOOK">C-LOOK</option>
+                    </select> </div>
+                <div class="flex flex-col gap-1"> <label for="start-head">Start Head Position</label> <input
+                        type="number" id="start-head" value="50"> </div>
+                <div class="flex flex-col gap-1"> <label for="max-cylinder">Max Cylinder</label> <input type="number"
+                        id="max-cylinder" value="500"> </div>
             </div>
             <div class="flex flex-col md:flex-row items-end gap-4">
-                 <div class="flex flex-col gap-1 w-full md:flex-grow"> <label for="request-queue-input">Request Queue (comma-separated)</label> <input type="text" id="request-queue-input" placeholder="e.g., 77, 66, 43, 90, 145, 421"> </div>
-                 <button id="update-queue-button" class="btn btn-indigo whitespace-nowrap w-full md:w-auto"> <span class="lucide">&#xe43d;</span> Update & Reset </button>
+                <div class="flex flex-col gap-1 w-full md:flex-grow"> <label for="request-queue-input">Request Queue
+                        (comma-separated)</label> <input type="text" id="request-queue-input"
+                        placeholder="e.g., 77, 66, 43, 90, 145, 421"> </div>
+                <button id="update-queue-button" class="btn btn-indigo whitespace-nowrap w-full md:w-auto"> <span
+                        class="lucide">&#xe43d;</span> Update & Reset </button>
             </div>
         </div>
 
         <div class="flex justify-center items-center gap-4 my-6">
-            <button id="start-button" class="btn btn-primary btn-lg"> <span class="lucide">&#xe445;</span> Animate All </button>
-            <button id="reset-button" class="btn btn-secondary"> <span class="lucide">&#xe49a;</span> Reset Defaults </button>
+            <button id="start-button" class="btn btn-primary btn-lg"> <span class="lucide">&#xe445;</span> Animate All
+            </button>
+            <button id="reset-button" class="btn btn-secondary"> <span class="lucide">&#xe49a;</span> Reset Defaults
+            </button>
         </div>
 
         <div class="section-card">
-            <h2 class="text-lg font-semibold text-slate-700 mb-3">Details (Selected Algorithm: <span id="selected-algo-details-title">FCFS</span>)</h2>
+            <h2 class="text-lg font-semibold text-slate-700 mb-3">Details (Selected Algorithm: <span
+                    id="selected-algo-details-title">FCFS</span>)</h2>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
                 <p><strong>Processed Queue:</strong> <span id="request-sequence-display" class="font-mono"></span></p>
                 <p><strong>Serviced Order:</strong> <span id="serviced-order-display" class="font-mono"></span></p>
-                <p><strong>Total Movement:</strong> <span id="total-movement-display" class="font-mono text-indigo-600 font-semibold">0</span></p>
+                <p><strong>Total Movement:</strong> <span id="total-movement-display"
+                        class="font-mono text-indigo-600 font-semibold">0</span></p>
             </div>
-             <p id="message-box" class="text-red-600 font-medium mt-3 text-sm"></p>
+            <p id="message-box" class="text-red-600 font-medium mt-3 text-sm"></p>
         </div>
 
         <div class="section-card">
             <h2 class="text-xl font-semibold text-slate-700 mb-6 text-center">Head Path Traces (Animated)</h2>
-             <div class="trace-grid"> </div>
+            <div class="trace-grid"> </div>
         </div>
 
-         <div class="section-card comparison-container">
-             <h2 class="text-xl font-semibold text-slate-700 mb-4 text-center">Algorithm Comparison</h2>
-             <div class="mb-6">
-                 <div class="flex justify-center flex-wrap gap-3 mb-4">
-                     <button id="compare-movement-btn" class="metric-button active">Total Head Movement</button>
-                     <button id="compare-avg-seek-btn" class="metric-button">Average Seek Time</button>
-                     <button id="compare-throughput-btn" class="metric-button">Throughput</button>
-                 </div>
-                 <canvas id="comparison-graph-canvas"></canvas>
-             </div>
-             <div>
-                 <h3 class="text-lg font-semibold text-slate-700 mb-3 text-center">Comparison Summary</h3>
-                 <div class="overflow-x-auto">
-                     <table class="comparison-table">
-                         <thead>
-                             <tr>
-                                 <th>Algorithm</th>
-                                 <th>Total Head Movement</th>
-                                 <th>Average Seek Time</th>
-                                 <th>Throughput</th>
-                             </tr>
-                         </thead>
-                         <tbody id="comparison-table-body">
-                             </tbody>
-                     </table>
-                 </div>
-             </div>
-         </div>
+        <div class="section-card comparison-container">
+            <h2 class="text-xl font-semibold text-slate-700 mb-4 text-center">Algorithm Comparison</h2>
+            <div class="mb-6">
+                <div class="flex justify-center flex-wrap gap-3 mb-4">
+                    <button id="compare-movement-btn" class="metric-button active">Total Head Movement</button>
+                    <button id="compare-avg-seek-btn" class="metric-button">Average Seek Time</button>
+                    <button id="compare-throughput-btn" class="metric-button">Throughput</button>
+                </div>
+                <canvas id="comparison-graph-canvas"></canvas>
+            </div>
+            <div>
+                <h3 class="text-lg font-semibold text-slate-700 mb-3 text-center">Comparison Summary</h3>
+                <div class="overflow-x-auto">
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Algorithm</th>
+                                <th>Total Head Movement</th>
+                                <th>Average Seek Time</th>
+                                <th>Throughput</th>
+                            </tr>
+                        </thead>
+                        <tbody id="comparison-table-body">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
 
     </div>
 
@@ -304,11 +414,11 @@
 
             // Input Validation
             if (isNaN(maxCylinder) || maxCylinder <= 0) { showMessage("Error: Max cylinder must be a positive number."); disableSimulation(); return; }
-            if (isNaN(initialHeadPosition) || initialHeadPosition < 0 || initialHeadPosition > maxCylinder) { showMessage(Error: Start head position must be between 0 and ${maxCylinder}.); disableSimulation(); return; }
+            if (isNaN(initialHeadPosition) || initialHeadPosition < 0 || initialHeadPosition > maxCylinder) { showMessage(`Error: Start head position must be between 0 and ${maxCylinder}.`); disableSimulation(); return; }
 
             // Parse Queue & Filter
             let queueString = requestQueueInput.value.trim() || DEFAULT_QUEUE_STRING;
-            if(requestQueueInput.value.trim() === '') requestQueueInput.value = queueString;
+            if (requestQueueInput.value.trim() === '') requestQueueInput.value = queueString;
             showMessage(requestQueueInput.value.trim() === '' ? "Input queue empty, using default." : "");
 
             currentRequests = queueString.split(',').map(s => s.trim()).filter(s => s !== '').map(Number);
@@ -345,8 +455,8 @@
                         drawInitialTracePoint(ctx, initialHeadPosition, numStepsForAxis, maxCylinder, canvas.width, canvas.height);
                     }
                 });
-                 drawComparisonGraph();
-                 populateComparisonTable(); // Populate the table
+                drawComparisonGraph();
+                populateComparisonTable(); // Populate the table
             });
 
             maxAnimationSteps = tempMaxSteps;
@@ -355,43 +465,43 @@
         }
 
         function disableSimulation() {
-             startButton.disabled = true;
-             traceGridContainer.innerHTML = '<p class="text-center text-slate-500 col-span-full">Simulation disabled due to invalid input.</p>';
-             comparisonCtx.clearRect(0, 0, comparisonCanvas.width, comparisonCanvas.height);
-             comparisonTableBody.innerHTML = '<tr><td colspan="4" class="text-center text-slate-500 py-4">Invalid input</td></tr>'; // Clear table
+            startButton.disabled = true;
+            traceGridContainer.innerHTML = '<p class="text-center text-slate-500 col-span-full">Simulation disabled due to invalid input.</p>';
+            comparisonCtx.clearRect(0, 0, comparisonCanvas.width, comparisonCanvas.height);
+            comparisonTableBody.innerHTML = '<tr><td colspan="4" class="text-center text-slate-500 py-4">Invalid input</td></tr>'; // Clear table
         }
 
         function createCanvasForAlgo(algoName, totalMovement) {
-             const traceItem = document.createElement('div');
-             traceItem.className = 'trace-item';
-             const title = document.createElement('h3');
-             title.textContent = ${algoName} (Movement: ${totalMovement});
-             traceItem.appendChild(title);
-             const canvasContainer = document.createElement('div');
-             canvasContainer.className = 'visualization-box canvas-container w-full';
-             const canvas = document.createElement('canvas');
-             canvas.id = trace-canvas-${algoName};
-             canvas.className = 'trace-canvas';
-             canvasContainer.appendChild(canvas);
-             const yLabel = document.createElement('span');
-             yLabel.className = 'axis-label y-axis-label';
-             yLabel.textContent = 'Step Number';
-             canvasContainer.appendChild(yLabel);
-             const xLabel = document.createElement('span');
-             xLabel.className = 'axis-label x-axis-label';
-             xLabel.textContent = 'Cylinder Number';
-             canvasContainer.appendChild(xLabel);
-             traceItem.appendChild(canvasContainer);
-             traceGridContainer.appendChild(traceItem);
-             const ctx = canvas.getContext('2d');
-             return { canvas, ctx };
+            const traceItem = document.createElement('div');
+            traceItem.className = 'trace-item';
+            const title = document.createElement('h3');
+            title.textContent = `${algoName} (Movement: ${totalMovement})`;
+            traceItem.appendChild(title);
+            const canvasContainer = document.createElement('div');
+            canvasContainer.className = 'visualization-box canvas-container w-full';
+            const canvas = document.createElement('canvas');
+            canvas.id = `trace - canvas - ${algoName}`;
+            canvas.className = 'trace-canvas';
+            canvasContainer.appendChild(canvas);
+            const yLabel = document.createElement('span');
+            yLabel.className = 'axis-label y-axis-label';
+            yLabel.textContent = 'Step Number';
+            canvasContainer.appendChild(yLabel);
+            const xLabel = document.createElement('span');
+            xLabel.className = 'axis-label x-axis-label';
+            xLabel.textContent = 'Cylinder Number';
+            canvasContainer.appendChild(xLabel);
+            traceItem.appendChild(canvasContainer);
+            traceGridContainer.appendChild(traceItem);
+            const ctx = canvas.getContext('2d');
+            return { canvas, ctx };
         }
 
         function updateDetailsDisplay(algoName) {
-             const result = allAlgorithmResults[algoName];
-             servicedOrderDisplay.textContent = result?.servicedOrder?.join(', ') || 'N/A';
-             totalMovementDisplay.textContent = result?.totalMovement ?? 'N/A';
-             selectedAlgoDetailsTitle.textContent = algoName;
+            const result = allAlgorithmResults[algoName];
+            servicedOrderDisplay.textContent = result?.servicedOrder?.join(', ') || 'N/A';
+            totalMovementDisplay.textContent = result?.totalMovement ?? 'N/A';
+            selectedAlgoDetailsTitle.textContent = algoName;
         }
 
         // --- Drawing Functions (Trace Graphs - Unchanged) ---
@@ -406,21 +516,21 @@
             let currentHead = startHead; let requestsCopy = [...reqs]; let servicedOrder = []; let totalMovement = 0; let direction = 1; let sortedReqs = [...requestsCopy].sort((a, b) => a - b);
             switch (algorithm) {
                 case 'FCFS': requestsCopy.forEach(req => { totalMovement += Math.abs(req - currentHead); currentHead = req; servicedOrder.push(req); }); break;
-                case 'SSTF': let sstfReqs = requestsCopy.map((r, i) => ({ val: r, id: i })); while (sstfReqs.length > 0) { let closestReqIndex = -1; let minDistance = Infinity; sstfReqs.forEach((req, index) => { const distance = Math.abs(req.val - currentHead); if (distance < minDistance) { minDistance = distance; closestReqIndex = index; }}); const closestReq = sstfReqs[closestReqIndex].val; totalMovement += minDistance; currentHead = closestReq; servicedOrder.push(currentHead); sstfReqs.splice(closestReqIndex, 1); } break;
+                case 'SSTF': let sstfReqs = requestsCopy.map((r, i) => ({ val: r, id: i })); while (sstfReqs.length > 0) { let closestReqIndex = -1; let minDistance = Infinity; sstfReqs.forEach((req, index) => { const distance = Math.abs(req.val - currentHead); if (distance < minDistance) { minDistance = distance; closestReqIndex = index; } }); const closestReq = sstfReqs[closestReqIndex].val; totalMovement += minDistance; currentHead = closestReq; servicedOrder.push(currentHead); sstfReqs.splice(closestReqIndex, 1); } break;
                 case 'SCAN': { direction = (currentHead === maxCyl || !sortedReqs.some(r => r >= currentHead)) ? -1 : 1; if (direction === 1) { let rightRequests = sortedReqs.filter(r => r >= currentHead); rightRequests.forEach(req => { totalMovement += Math.abs(req - currentHead); currentHead = req; servicedOrder.push(currentHead); }); if (sortedReqs.length > 0 && currentHead !== maxCyl) { totalMovement += Math.abs(maxCyl - currentHead); currentHead = maxCyl; } let leftRequests = sortedReqs.filter(r => r < initialHeadPosition).sort((a, b) => b - a); leftRequests.forEach(req => { totalMovement += Math.abs(req - currentHead); currentHead = req; servicedOrder.push(currentHead); }); } else { let leftRequests = sortedReqs.filter(r => r <= currentHead).sort((a, b) => b - a); leftRequests.forEach(req => { totalMovement += Math.abs(req - currentHead); currentHead = req; servicedOrder.push(currentHead); }); if (sortedReqs.length > 0 && currentHead !== 0) { totalMovement += Math.abs(0 - currentHead); currentHead = 0; } let rightRequests = sortedReqs.filter(r => r > initialHeadPosition).sort((a, b) => a - b); rightRequests.forEach(req => { totalMovement += Math.abs(req - currentHead); currentHead = req; servicedOrder.push(currentHead); }); } break; }
                 case 'C-SCAN': { let rightRequests = sortedReqs.filter(r => r >= currentHead); rightRequests.forEach(req => { totalMovement += Math.abs(req - currentHead); currentHead = req; servicedOrder.push(currentHead); }); if (sortedReqs.some(r => r < initialHeadPosition)) { if (currentHead !== maxCyl) { totalMovement += Math.abs(maxCyl - currentHead); currentHead = maxCyl; } totalMovement += maxCyl; currentHead = 0; let leftRequests = sortedReqs.filter(r => r < initialHeadPosition); leftRequests.forEach(req => { totalMovement += Math.abs(req - currentHead); currentHead = req; servicedOrder.push(currentHead); }); } break; }
-                case 'LOOK': { direction = (currentHead === (sortedReqs[sortedReqs.length-1] ?? currentHead) || !sortedReqs.some(r => r > currentHead)) ? -1 : 1; if (direction === 1) { let rightRequests = sortedReqs.filter(r => r >= currentHead); rightRequests.forEach(req => { totalMovement += Math.abs(req - currentHead); currentHead = req; servicedOrder.push(currentHead); }); let leftRequests = sortedReqs.filter(r => r < initialHeadPosition).sort((a, b) => b - a); leftRequests.forEach(req => { totalMovement += Math.abs(req - currentHead); currentHead = req; servicedOrder.push(currentHead); }); } else { let leftRequests = sortedReqs.filter(r => r <= currentHead).sort((a, b) => b - a); leftRequests.forEach(req => { totalMovement += Math.abs(req - currentHead); currentHead = req; servicedOrder.push(currentHead); }); let rightRequests = sortedReqs.filter(r => r > initialHeadPosition).sort((a, b) => a - b); rightRequests.forEach(req => { totalMovement += Math.abs(req - currentHead); currentHead = req; servicedOrder.push(currentHead); }); } break; }
-                case 'C-LOOK': { let rightRequests = sortedReqs.filter(r => r >= currentHead); rightRequests.forEach(req => { totalMovement += Math.abs(req - currentHead); currentHead = req; servicedOrder.push(currentHead); }); let leftRequests = sortedReqs.filter(r => r < initialHeadPosition); if (leftRequests.length > 0) { currentHead = sortedReqs[0]; leftRequests.forEach(req => { if (!servicedOrder.includes(req)) { totalMovement += Math.abs(req - currentHead); currentHead = req; servicedOrder.push(currentHead); }}); } break; }
+                case 'LOOK': { direction = (currentHead === (sortedReqs[sortedReqs.length - 1] ?? currentHead) || !sortedReqs.some(r => r > currentHead)) ? -1 : 1; if (direction === 1) { let rightRequests = sortedReqs.filter(r => r >= currentHead); rightRequests.forEach(req => { totalMovement += Math.abs(req - currentHead); currentHead = req; servicedOrder.push(currentHead); }); let leftRequests = sortedReqs.filter(r => r < initialHeadPosition).sort((a, b) => b - a); leftRequests.forEach(req => { totalMovement += Math.abs(req - currentHead); currentHead = req; servicedOrder.push(currentHead); }); } else { let leftRequests = sortedReqs.filter(r => r <= currentHead).sort((a, b) => b - a); leftRequests.forEach(req => { totalMovement += Math.abs(req - currentHead); currentHead = req; servicedOrder.push(currentHead); }); let rightRequests = sortedReqs.filter(r => r > initialHeadPosition).sort((a, b) => a - b); rightRequests.forEach(req => { totalMovement += Math.abs(req - currentHead); currentHead = req; servicedOrder.push(currentHead); }); } break; }
+                case 'C-LOOK': { let rightRequests = sortedReqs.filter(r => r >= currentHead); rightRequests.forEach(req => { totalMovement += Math.abs(req - currentHead); currentHead = req; servicedOrder.push(currentHead); }); let leftRequests = sortedReqs.filter(r => r < initialHeadPosition); if (leftRequests.length > 0) { currentHead = sortedReqs[0]; leftRequests.forEach(req => { if (!servicedOrder.includes(req)) { totalMovement += Math.abs(req - currentHead); currentHead = req; servicedOrder.push(currentHead); } }); } break; }
             } return { servicedOrder, totalMovement };
         }
 
         // --- Animation (Drives ALL Trace Graphs - Unchanged) ---
         function animateMovement() { /* ... [Identical logic] ... */
-             if (isAnimating) return; if (maxAnimationSteps === 0 && currentRequests.length > 0) { showMessage("Error during calculation, cannot animate."); return; } if (maxAnimationSteps === 0 && currentRequests.length === 0) { showMessage("No requests to animate."); return; }
-             isAnimating = true; startButton.disabled = true; startButton.innerHTML = '<span class="lucide">&#xe43b;</span> Animating...'; showMessage("Animation running...");
-             let currentAnimationStep = 0; const animationSpeed = 500; const numTotalStepsForAxis = currentRequests.length + 1; let prevPositions = {}; algorithmOrder.forEach(algoName => { prevPositions[algoName] = initialHeadPosition; });
-             algorithmOrder.forEach(algoName => { if (traceCanvasContexts[algoName]) { const { canvas, ctx } = traceCanvasContexts[algoName]; requestAnimationFrame(() => { setupTraceCanvas(canvas, ctx, numTotalStepsForAxis, maxCylinder); drawInitialTracePoint(ctx, initialHeadPosition, numTotalStepsForAxis, maxCylinder, canvas.width, canvas.height); }); }});
-             function step() { if (currentAnimationStep >= maxAnimationSteps) { isAnimating = false; startButton.disabled = false; startButton.innerHTML = '<span class="lucide">&#xe445;</span> Animate All'; showMessage("Animation complete."); return; } const drawingStep = currentAnimationStep + 1; algorithmOrder.forEach(algoName => { const result = allAlgorithmResults[algoName]; const order = result?.servicedOrder; const contextInfo = traceCanvasContexts[algoName]; if (order && contextInfo && currentAnimationStep < order.length) { const { canvas, ctx } = contextInfo; const currentTrack = order[currentAnimationStep]; const prevTrack = prevPositions[algoName]; if (canvas.width > 0 && canvas.height > 0) { drawTraceSegment(ctx, drawingStep, prevTrack, currentTrack, numTotalStepsForAxis, maxCylinder, canvas.width, canvas.height); prevPositions[algoName] = currentTrack; } } }); currentAnimationStep++; animationTimeout = setTimeout(step, animationSpeed); } setTimeout(step, 50);
+            if (isAnimating) return; if (maxAnimationSteps === 0 && currentRequests.length > 0) { showMessage("Error during calculation, cannot animate."); return; } if (maxAnimationSteps === 0 && currentRequests.length === 0) { showMessage("No requests to animate."); return; }
+            isAnimating = true; startButton.disabled = true; startButton.innerHTML = '<span class="lucide">&#xe43b;</span> Animating...'; showMessage("Animation running...");
+            let currentAnimationStep = 0; const animationSpeed = 500; const numTotalStepsForAxis = currentRequests.length + 1; let prevPositions = {}; algorithmOrder.forEach(algoName => { prevPositions[algoName] = initialHeadPosition; });
+            algorithmOrder.forEach(algoName => { if (traceCanvasContexts[algoName]) { const { canvas, ctx } = traceCanvasContexts[algoName]; requestAnimationFrame(() => { setupTraceCanvas(canvas, ctx, numTotalStepsForAxis, maxCylinder); drawInitialTracePoint(ctx, initialHeadPosition, numTotalStepsForAxis, maxCylinder, canvas.width, canvas.height); }); } });
+            function step() { if (currentAnimationStep >= maxAnimationSteps) { isAnimating = false; startButton.disabled = false; startButton.innerHTML = '<span class="lucide">&#xe445;</span> Animate All'; showMessage("Animation complete."); return; } const drawingStep = currentAnimationStep + 1; algorithmOrder.forEach(algoName => { const result = allAlgorithmResults[algoName]; const order = result?.servicedOrder; const contextInfo = traceCanvasContexts[algoName]; if (order && contextInfo && currentAnimationStep < order.length) { const { canvas, ctx } = contextInfo; const currentTrack = order[currentAnimationStep]; const prevTrack = prevPositions[algoName]; if (canvas.width > 0 && canvas.height > 0) { drawTraceSegment(ctx, drawingStep, prevTrack, currentTrack, numTotalStepsForAxis, maxCylinder, canvas.width, canvas.height); prevPositions[algoName] = currentTrack; } } }); currentAnimationStep++; animationTimeout = setTimeout(step, animationSpeed); } setTimeout(step, 50);
         }
 
         // --- Comparison Graph Drawing (Adjusted Y-Axis Title Spacing) ---
@@ -448,54 +558,54 @@
                 yAxisLabel = "Average Seek Time"; valueFormatPrecision = 2;
                 algorithmOrder.forEach(algoName => { const value = allAlgorithmResults[algoName]?.avgSeekTime ?? 0; data.push({ label: algoName, value: value }); maxValue = Math.max(maxValue, value); });
             } else { // throughput
-                 yAxisLabel = "Throughput (Reqs / (Movement+1))"; valueFormatPrecision = 4;
-                 algorithmOrder.forEach(algoName => { const value = allAlgorithmResults[algoName]?.throughput ?? 0; data.push({ label: algoName, value: value }); maxValue = Math.max(maxValue, value); });
+                yAxisLabel = "Throughput (Reqs / (Movement+1))"; valueFormatPrecision = 4;
+                algorithmOrder.forEach(algoName => { const value = allAlgorithmResults[algoName]?.throughput ?? 0; data.push({ label: algoName, value: value }); maxValue = Math.max(maxValue, value); });
             }
 
-             if (maxValue === 0) maxValue = (currentComparisonMetric === 'throughput' ? 1 : 10);
+            if (maxValue === 0) maxValue = (currentComparisonMetric === 'throughput' ? 1 : 10);
 
-             // Use the increased COMP_PADDING value here
-             const plotWidth = width - 2 * COMP_PADDING;
-             const plotHeight = height - 2 * COMP_PADDING;
-             const barTotalSpace = plotWidth / data.length;
-             const barSpacing = barTotalSpace * 0.3;
-             const barWidth = barTotalSpace * 0.7;
+            // Use the increased COMP_PADDING value here
+            const plotWidth = width - 2 * COMP_PADDING;
+            const plotHeight = height - 2 * COMP_PADDING;
+            const barTotalSpace = plotWidth / data.length;
+            const barSpacing = barTotalSpace * 0.3;
+            const barWidth = barTotalSpace * 0.7;
 
-             // Draw Axes
-             ctx.strokeStyle = COMP_AXIS_COLOR; ctx.lineWidth = 1; ctx.font = '11px Inter, sans-serif';
-             ctx.beginPath(); ctx.moveTo(COMP_PADDING, COMP_PADDING); ctx.lineTo(COMP_PADDING, height - COMP_PADDING); ctx.stroke(); // Y-Axis Line
-             ctx.beginPath(); ctx.moveTo(COMP_PADDING, height - COMP_PADDING); ctx.lineTo(width - COMP_PADDING, height - COMP_PADDING); ctx.stroke(); // X-Axis Line
+            // Draw Axes
+            ctx.strokeStyle = COMP_AXIS_COLOR; ctx.lineWidth = 1; ctx.font = '11px Inter, sans-serif';
+            ctx.beginPath(); ctx.moveTo(COMP_PADDING, COMP_PADDING); ctx.lineTo(COMP_PADDING, height - COMP_PADDING); ctx.stroke(); // Y-Axis Line
+            ctx.beginPath(); ctx.moveTo(COMP_PADDING, height - COMP_PADDING); ctx.lineTo(width - COMP_PADDING, height - COMP_PADDING); ctx.stroke(); // X-Axis Line
 
-             // Draw Y Axis Labels and Grid Lines
-             const numYTicks = 5;
-             ctx.fillStyle = COMP_LABEL_COLOR; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
-             for (let i = 0; i <= numYTicks; i++) {
-                 const value = (maxValue / numYTicks) * i;
-                 const y = height - COMP_PADDING - (value / maxValue) * plotHeight;
-                 // Use increased COMP_PADDING here, keep label offset consistent relative to the axis line
-                 ctx.fillText(value.toFixed(valueFormatPrecision), COMP_PADDING - 12, y);
-                 ctx.strokeStyle = COMP_GRID_COLOR; ctx.beginPath(); ctx.moveTo(COMP_PADDING + 1, y); ctx.lineTo(width - COMP_PADDING, y); ctx.stroke();
-             }
-             // Y Axis Title
-             ctx.save();
-             // --- MODIFICATION: Adjusted Y-axis title position for increased padding ---
-             ctx.translate(COMP_PADDING * 0.35, height / 2); // Adjusted multiplier slightly
-             ctx.rotate(-Math.PI / 2); ctx.textAlign = 'center'; ctx.font = '12px Inter, sans-serif'; ctx.fillText(yAxisLabel, 0, 0); ctx.restore();
+            // Draw Y Axis Labels and Grid Lines
+            const numYTicks = 5;
+            ctx.fillStyle = COMP_LABEL_COLOR; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+            for (let i = 0; i <= numYTicks; i++) {
+                const value = (maxValue / numYTicks) * i;
+                const y = height - COMP_PADDING - (value / maxValue) * plotHeight;
+                // Use increased COMP_PADDING here, keep label offset consistent relative to the axis line
+                ctx.fillText(value.toFixed(valueFormatPrecision), COMP_PADDING - 12, y);
+                ctx.strokeStyle = COMP_GRID_COLOR; ctx.beginPath(); ctx.moveTo(COMP_PADDING + 1, y); ctx.lineTo(width - COMP_PADDING, y); ctx.stroke();
+            }
+            // Y Axis Title
+            ctx.save();
+            // --- MODIFICATION: Adjusted Y-axis title position for increased padding ---
+            ctx.translate(COMP_PADDING * 0.35, height / 2); // Adjusted multiplier slightly
+            ctx.rotate(-Math.PI / 2); ctx.textAlign = 'center'; ctx.font = '12px Inter, sans-serif'; ctx.fillText(yAxisLabel, 0, 0); ctx.restore();
 
-             // Draw Bars and X Axis Labels
-             ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.font = '11px Inter, sans-serif';
-             data.forEach((item, index) => {
-                 const x = COMP_PADDING + barSpacing / 2 + index * barTotalSpace;
-                 const barHeight = (item.value / maxValue) * plotHeight;
-                 const y = height - COMP_PADDING - barHeight;
-                 // Ensure alignment by using calculated x and width
-                 ctx.fillStyle = COMP_BAR_COLOR; ctx.fillRect(x, y, barWidth, barHeight);
-                 ctx.fillStyle = COMP_LABEL_COLOR;
-                 // Ensure text alignment is centered and y position is consistent
-                 ctx.fillText(item.label, x + barWidth / 2, height - COMP_PADDING + 12);
-                 ctx.fillStyle = COMP_LABEL_COLOR; ctx.textBaseline = 'bottom'; ctx.font = '10px Inter, sans-serif';
-                 ctx.fillText(item.value.toFixed(valueFormatPrecision), x + barWidth / 2, y - 4);
-             });
+            // Draw Bars and X Axis Labels
+            ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.font = '11px Inter, sans-serif';
+            data.forEach((item, index) => {
+                const x = COMP_PADDING + barSpacing / 2 + index * barTotalSpace;
+                const barHeight = (item.value / maxValue) * plotHeight;
+                const y = height - COMP_PADDING - barHeight;
+                // Ensure alignment by using calculated x and width
+                ctx.fillStyle = COMP_BAR_COLOR; ctx.fillRect(x, y, barWidth, barHeight);
+                ctx.fillStyle = COMP_LABEL_COLOR;
+                // Ensure text alignment is centered and y position is consistent
+                ctx.fillText(item.label, x + barWidth / 2, height - COMP_PADDING + 12);
+                ctx.fillStyle = COMP_LABEL_COLOR; ctx.textBaseline = 'bottom'; ctx.font = '10px Inter, sans-serif';
+                ctx.fillText(item.value.toFixed(valueFormatPrecision), x + barWidth / 2, y - 4);
+            });
         }
 
         // --- Populate Comparison Table ---
@@ -520,13 +630,13 @@
                 const cellThroughput = row.insertCell();
                 cellThroughput.textContent = result.throughput.toFixed(4);
 
-                 // Apply right-align class to number cells (can also be done via CSS)
-                 cellMovement.style.textAlign = 'right';
-                 cellAvgSeek.style.textAlign = 'right';
-                 cellThroughput.style.textAlign = 'right';
-                 cellMovement.style.fontFamily = 'monospace';
-                 cellAvgSeek.style.fontFamily = 'monospace';
-                 cellThroughput.style.fontFamily = 'monospace';
+                // Apply right-align class to number cells (can also be done via CSS)
+                cellMovement.style.textAlign = 'right';
+                cellAvgSeek.style.textAlign = 'right';
+                cellThroughput.style.textAlign = 'right';
+                cellMovement.style.fontFamily = 'monospace';
+                cellAvgSeek.style.fontFamily = 'monospace';
+                cellThroughput.style.fontFamily = 'monospace';
             });
         }
 
@@ -558,4 +668,5 @@
     </script>
 
 </body>
+
 </html>
