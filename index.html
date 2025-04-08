@@ -5,11 +5,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Disk Scheduling Simulation</title>
+    <!-- Using Tailwind CDN for rapid prototyping -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
     <style>
+        /* Using @font-face for Lucide Icons (Self-hosted alternative is possible) */
         @font-face {
             font-family: 'LucideIcons';
             src: url(https://cdn.jsdelivr.net/npm/lucide-static@latest/font/Lucide.ttf) format('truetype');
@@ -18,93 +23,180 @@
         .lucide {
             font-family: 'LucideIcons';
             font-size: 1.1rem;
+            /* Adjust size as needed */
             line-height: 1;
             display: inline-block;
             vertical-align: middle;
         }
 
+        /* Base body styles */
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f8fafc;
             /* slate-50 */
+            color: #334155;
+            /* slate-700 */
         }
 
+        /* Reusable card component */
         .section-card {
             background-color: white;
             border-radius: 0.5rem;
+            /* rounded-lg */
             padding: 1.5rem;
+            /* p-6 */
             box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            /* shadow-md */
             margin-bottom: 2rem;
+            /* mb-8 */
         }
 
+        /* Container for trace visualization */
         .visualization-box {
             border: 1px solid #e2e8f0;
+            /* border-slate-200 */
             background-color: #f8fafc;
+            /* bg-slate-50 */
             border-radius: 0.375rem;
+            /* rounded-md */
             position: relative;
             overflow: hidden;
             margin-bottom: 1rem;
+            /* mb-4 */
         }
 
+        /* Styling for individual trace canvases */
         .trace-canvas {
             display: block;
             width: 100%;
-            height: 1050px;
+            height: 450px;
+            /* Adjusted default height */
             border: 1px solid #e2e8f0;
+            /* border-slate-200 */
             border-radius: 0.25rem;
+            /* rounded-sm */
         }
 
+        /* Styling for the comparison graph canvas */
         #comparison-graph-canvas {
             display: block;
             width: 100%;
             height: 400px;
             border: 1px solid #e2e8f0;
+            /* border-slate-200 */
             border-radius: 0.25rem;
+            /* rounded-sm */
             background-color: #f8fafc;
+            /* bg-slate-50 */
         }
 
+        /* --- Styling for the NEW All-in-One Canvas --- */
+        #all-in-one-canvas {
+            display: block;
+            width: 100%;
+            height: 600px;
+            /* Taller canvas for combined view */
+            border-radius: 0.25rem;
+            /* background-color set in JS fillRect */
+            border: 1px solid #475569;
+            /* slate-600 border */
+        }
+
+        .all-in-one-container {
+            position: relative;
+            width: 100%;
+            max-width: 1000px;
+            /* Wider container */
+            margin: 1rem auto 0 auto;
+            /* mt-4 mx-auto */
+            /* Removed padding-bottom, let content define height */
+        }
+
+        /* Specific label positioning for All-in-One plot */
+        .all-in-one-container .axis-label.x-axis-label {
+            color: #cbd5e1;
+            /* Lighter color for dark bg */
+            position: absolute;
+            bottom: auto;
+            /* Remove bottom positioning */
+            top: 15px;
+            /* Position near top axis */
+            left: 50%;
+            transform: translateX(-50%);
+            font-weight: 500;
+        }
+
+        .all-in-one-container .axis-label.y-axis-label {
+            color: #cbd5e1;
+            /* Lighter color for dark bg */
+            position: absolute;
+            left: 15px;
+            /* Adjust position */
+            top: 50%;
+            transform: translateY(-50%) rotate(-90deg);
+            transform-origin: left center;
+            font-weight: 500;
+        }
+
+        /* --- End All-in-One Styles --- */
+
+        /* Centered container for individual trace canvases */
         .canvas-container {
             position: relative;
             width: 100%;
             max-width: 800px;
+            /* Limit max width for better readability */
             margin-left: auto;
             margin-right: auto;
             padding-bottom: 25px;
+            /* Space for x-axis label */
         }
 
+        /* Container for comparison section */
         .comparison-container {
             width: 100%;
             max-width: 900px;
+            /* Wider for comparison */
             margin: 2rem auto 0 auto;
+            /* mt-8 mx-auto */
         }
 
+        /* Styling for axis labels (General) */
         .axis-label {
-            position: absolute;
+            /* position: absolute; defined per-plot */
             font-size: 0.75rem;
+            /* text-xs */
             color: #475569;
+            /* slate-600 */
             white-space: nowrap;
         }
 
-        .y-axis-label {
+        /* Positioning for individual trace Y label */
+        .canvas-container .y-axis-label {
             position: absolute;
             top: 50%;
             left: 10px;
+            /* Adjust as needed */
             transform: translateY(-50%) rotate(-90deg);
             transform-origin: left center;
         }
 
-        .x-axis-label {
+        /* Positioning for individual trace X label */
+        .canvas-container .x-axis-label {
             position: absolute;
             bottom: 5px;
+            /* Adjust as needed */
             left: 50%;
             transform: translateX(-50%);
         }
 
+        /* Grid layout for trace visualizations */
         .trace-grid {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            /* Responsive grid */
             gap: 2.5rem;
+            /* gap-10 */
             width: 100%;
         }
 
@@ -117,19 +209,56 @@
 
         .trace-item h3 {
             font-size: 1.125rem;
+            /* text-lg */
             font-weight: 600;
+            /* font-semibold */
             color: #1e293b;
-            margin-bottom: 0.75rem;
+            /* slate-800 */
+            margin-bottom: 0.2rem;
+            /* mb-1 reduced space */
             text-align: center;
         }
 
+        .trace-item .movement-info {
+            /* Class for the movement text */
+            font-size: 0.875rem;
+            /* text-sm */
+            color: #475569;
+            /* slate-600 */
+            margin-bottom: 0.5rem;
+            /* mb-2 */
+            font-family: 'Roboto Mono', monospace;
+            text-align: center;
+        }
+
+        .trace-item .movement-info strong {
+            color: #4f46e5;
+            /* indigo-600 */
+            font-weight: 600;
+        }
+
+        /* Styling for form elements */
         input[type="number"],
         input[type="text"],
         select {
             border-color: #cbd5e1;
+            /* border-slate-300 */
             border-radius: 0.375rem;
+            /* rounded-md */
             padding: 0.5rem 0.75rem;
+            /* py-2 px-3 */
             transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            border-width: 1px;
+            width: 100%;
+            /* Make inputs take full width of their container */
+        }
+
+        input:disabled,
+        select:disabled {
+            background-color: #f1f5f9;
+            /* slate-100 */
+            cursor: not-allowed;
+            opacity: 0.7;
         }
 
         input[type="number"]:focus,
@@ -137,19 +266,35 @@
         select:focus {
             outline: none;
             border-color: #4f46e5;
+            /* focus:border-indigo-600 */
             box-shadow: 0 0 0 2px #c7d2fe;
+            /* focus:ring focus:ring-indigo-200 */
         }
 
+        /* Button base styles */
         .btn {
             display: inline-flex;
             align-items: center;
+            justify-content: center;
+            /* Center content */
             gap: 0.5rem;
+            /* gap-2 */
             padding: 0.625rem 1.25rem;
+            /* py-2.5 px-5 */
             border-radius: 0.375rem;
+            /* rounded-md */
             font-weight: 500;
-            transition: background-color 0.2s ease;
+            /* font-medium */
+            transition: background-color 0.2s ease, opacity 0.2s ease;
             cursor: pointer;
             border: 1px solid transparent;
+            white-space: nowrap;
+            /* Prevent wrapping */
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
 
         .btn-primary {
@@ -157,67 +302,112 @@
             color: white;
         }
 
-        .btn-primary:hover {
+        /* bg-indigo-600 text-white */
+        .btn-primary:hover:not(:disabled) {
             background-color: #4338ca;
         }
 
+        /* hover:bg-indigo-700 */
         .btn-secondary {
             background-color: #e2e8f0;
             color: #1e293b;
             border-color: #cbd5e1;
         }
 
-        .btn-secondary:hover {
+        /* bg-slate-200 text-slate-800 border-slate-300 */
+        .btn-secondary:hover:not(:disabled) {
             background-color: #cbd5e1;
         }
 
+        /* hover:bg-slate-300 */
         .btn-indigo {
             background-color: #6366f1;
             color: white;
         }
 
-        .btn-indigo:hover {
+        /* bg-indigo-500 text-white */
+        .btn-indigo:hover:not(:disabled) {
             background-color: #4f46e5;
         }
 
+        /* hover:bg-indigo-600 */
+        .btn-teal {
+            background-color: #14b8a6;
+            color: white;
+        }
+
+        /* bg-teal-500 text-white */
+        .btn-teal:hover:not(:disabled) {
+            background-color: #0d9488;
+        }
+
+        /* hover:bg-teal-600 */
         .btn-lg {
             padding: 0.75rem 1.5rem;
             font-size: 1rem;
         }
 
+        /* py-3 px-6 text-base */
+        /* Metric comparison button styles */
         .metric-button {
             padding: 0.5rem 1rem;
+            /* py-2 px-4 */
             border: 1px solid #cbd5e1;
+            /* border-slate-300 */
             border-radius: 0.375rem;
+            /* rounded-md */
             background-color: white;
             color: #334155;
+            /* text-slate-700 */
             font-weight: 500;
+            /* font-medium */
             cursor: pointer;
             transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+            font-size: 0.875rem;
+            /* text-sm */
+        }
+
+        .metric-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background-color: #f8fafc;
         }
 
         .metric-button.active {
             background-color: #6366f1;
+            /* bg-indigo-500 */
             color: white;
             border-color: #6366f1;
+            /* border-indigo-500 */
         }
 
-        .metric-button:hover:not(.active) {
+        .metric-button:hover:not(.active):not(:disabled) {
             background-color: #f1f5f9;
+            /* hover:bg-slate-100 */
         }
 
+        /* Heading styles */
         h1,
         h2 {
             color: #1e293b;
+            /* slate-800 */
         }
 
+        /* Label styles */
         label {
             color: #334155;
             font-weight: 500;
+            display: block;
+            margin-bottom: 0.25rem;
+            font-size: 0.875rem;
         }
 
+        /* slate-700 font-medium block mb-1 text-sm */
+        /* Paragraph styles */
         p {
             color: #475569;
+            /* slate-600 */
+            line-height: 1.6;
         }
 
         /* --- Table Styling --- */
@@ -228,36 +418,99 @@
             border-collapse: collapse;
             font-size: 0.875rem;
             /* text-sm */
+            box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            /* shadow-sm */
+            border-radius: 0.375rem;
+            /* rounded-md */
+            overflow: hidden;
+            /* Ensures border radius applies to content */
         }
 
         .comparison-table th,
         .comparison-table td {
             border: 1px solid #e2e8f0;
-            /* slate-200 */
-            padding: 0.75rem;
-            /* p-3 */
+            /* border-slate-200 */
+            padding: 0.75rem 1rem;
+            /* py-3 px-4 */
             text-align: left;
         }
 
         .comparison-table th {
             background-color: #f1f5f9;
-            /* slate-100 */
+            /* bg-slate-100 */
             font-weight: 600;
             /* font-semibold */
             color: #334155;
-            /* slate-700 */
+            /* text-slate-700 */
         }
 
         .comparison-table tbody tr:nth-child(even) {
             background-color: #f8fafc;
-            /* slate-50 */
+            /* bg-slate-50 */
+        }
+
+        .comparison-table tbody tr:hover {
+            background-color: #f1f5f9;
+            /* hover:bg-slate-100 */
         }
 
         .comparison-table td:not(:first-child) {
             text-align: right;
-            /* Align numbers to the right */
-            font-family: monospace;
-            /* Monospace font for numbers */
+            font-family: 'Roboto Mono', monospace;
+        }
+
+        .font-mono {
+            font-family: 'Roboto Mono', monospace;
+        }
+
+        /* Legend for All-in-One Plot */
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.5rem 1.5rem;
+            /* row-gap column-gap */
+            margin-top: 1rem;
+            font-size: 0.8rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            color: #475569;
+            /* slate-600 */
+        }
+
+        .legend-color-box {
+            width: 12px;
+            height: 12px;
+            border: 1px solid #94a3b8;
+            /* slate-400 */
+            display: inline-block;
+            border-radius: 2px;
+        }
+
+        /* Tooltip styles (optional, can be enhanced) */
+        .tooltip {
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 3px 6px;
+            border-radius: 3px;
+            font-size: 9px;
+            white-space: nowrap;
+            z-index: 10;
+            pointer-events: none;
+            /* Important */
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+        }
+
+        .visualization-box:hover .tooltip {
+            /* Show tooltip on container hover if needed */
+            /* opacity: 1; */
+            /* Control visibility via JS */
         }
     </style>
 </head>
@@ -265,70 +518,118 @@
 <body class="bg-slate-50 font-sans p-4 md:p-8 flex flex-col items-center min-h-screen">
 
     <div class="w-full max-w-7xl mx-auto">
-        <h1 class="text-3xl font-bold text-center text-slate-800 mb-8">Disk Scheduling Algorithm Simulation</h1>
+        <header class="mb-10">
+            <h1 class="text-3xl md:text-4xl font-bold text-center text-slate-800">Disk Scheduling Algorithm Simulation
+            </h1>
+            <p class="text-center text-slate-600 mt-2">Visualize and compare FCFS, SSTF, SCAN, C-SCAN, LOOK, and C-LOOK
+                algorithms. Dashed lines show non-servicing head movement.</p>
+        </header>
 
         <div class="section-card">
-            <h2 class="text-xl font-semibold text-slate-700 mb-4 text-center">Configuration</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                <div class="flex flex-col gap-1"> <label for="algorithm-select">Algorithm (for Details)</label> <select
-                        id="algorithm-select">
-                        <option value="FCFS">FCFS</option>
-                        <option value="SSTF">SSTF</option>
-                        <option value="SCAN">SCAN</option>
-                        <option value="C-SCAN">C-SCAN</option>
+            <h2 class="text-xl font-semibold text-slate-700 mb-5 text-center">Configuration</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-5">
+                <div class="flex flex-col"> <label for="algorithm-select">Algorithm (for Details)</label> <select
+                        id="algorithm-select" class="mt-1">
+                        <option value="FCFS">FCFS (First-Come, First-Served)</option>
+                        <option value="SSTF">SSTF (Shortest Seek Time First)</option>
+                        <option value="SCAN">SCAN (Elevator)</option>
+                        <option value="C-SCAN">C-SCAN (Circular SCAN)</option>
                         <option value="LOOK">LOOK</option>
-                        <option value="C-LOOK">C-LOOK</option>
+                        <option value="C-LOOK">C-LOOK (Circular LOOK)</option>
                     </select> </div>
-                <div class="flex flex-col gap-1"> <label for="start-head">Start Head Position</label> <input
-                        type="number" id="start-head" value="50"> </div>
-                <div class="flex flex-col gap-1"> <label for="max-cylinder">Max Cylinder</label> <input type="number"
-                        id="max-cylinder" value="500"> </div>
+                <div class="flex flex-col"> <label for="start-head">Start Head Position</label> <input type="number"
+                        id="start-head" value="53" min="0" class="mt-1"> </div>
+                <div class="flex flex-col"> <label for="max-cylinder">Max Cylinder</label> <input type="number"
+                        id="max-cylinder" value="199" min="1" class="mt-1"> </div>
+                <div class="flex flex-col">
+                    <label for="animation-speed-select">Indiv. Animation Speed Factor</label>
+                    <select id="animation-speed-select" class="mt-1">
+                        <option value="4">Slow (4ms/unit moved)</option>
+                        <option value="2" selected>Medium (2ms/unit moved)</option>
+                        <option value="1">Fast (1ms/unit moved)</option>
+                        <option value="0.5">Very Fast (0.5ms/unit moved)</option>
+                    </select>
+                </div>
             </div>
             <div class="flex flex-col md:flex-row items-end gap-4">
-                <div class="flex flex-col gap-1 w-full md:flex-grow"> <label for="request-queue-input">Request Queue
+                <div class="flex flex-col w-full md:flex-grow"> <label for="request-queue-input">Request Queue
                         (comma-separated)</label> <input type="text" id="request-queue-input"
-                        placeholder="e.g., 77, 66, 43, 90, 145, 421"> </div>
-                <button id="update-queue-button" class="btn btn-indigo whitespace-nowrap w-full md:w-auto"> <span
-                        class="lucide">&#xe43d;</span> Update & Reset </button>
+                        placeholder="e.g., 98, 183, 37, 122, 14, 124, 65, 67" class="mt-1"> </div>
+                <button id="update-queue-button" class="btn btn-indigo w-full md:w-auto"> <span class="lucide"></span>
+                    Update & Reset </button>
+            </div>
+            <p id="message-box" class="font-medium mt-4 text-sm text-center"></p>
+        </div>
+
+        <div class="flex justify-center items-center flex-wrap gap-4 my-8">
+            <button id="start-button" class="btn btn-primary btn-lg"> <span class="lucide"></span> Animate Individual
+                Traces</button>
+            <!-- New Button for Combined Animation -->
+            <button id="animate-combined-button" class="btn btn-teal btn-lg"> <span class="lucide"></span> Animate
+                Combined Plot</button>
+            <button id="reset-button" class="btn btn-secondary"> <span class="lucide"></span> Reset Defaults </button>
+        </div>
+
+        <!-- Details Section -->
+        <div class="section-card">
+            <h2 class="text-lg font-semibold text-slate-700 mb-4">Details (Selected Algorithm: <span
+                    id="selected-algo-details-title" class="font-bold text-indigo-600">FCFS</span>)</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+                <div><strong class="text-slate-600">Initial Queue:</strong> <span id="request-sequence-display"
+                        class="font-mono block break-words mt-1"></span></div>
+                <div><strong class="text-slate-600">Serviced Request Order:</strong> <span id="serviced-order-display"
+                        class="font-mono block break-words mt-1"></span></div>
+                <div><strong class="text-slate-600">Total Head Movement:</strong> <span id="total-movement-display"
+                        class="font-mono text-indigo-600 font-semibold block mt-1">0</span></div>
+                <!-- Optional: Display Full Path? It might be too long.
+                <div class="sm:col-span-3"><strong class="text-slate-600">Full Head Path:</strong> <span id="full-path-display" class="font-mono block break-words mt-1 text-xs"></span></div>
+                -->
             </div>
         </div>
 
-        <div class="flex justify-center items-center gap-4 my-6">
-            <button id="start-button" class="btn btn-primary btn-lg"> <span class="lucide">&#xe445;</span> Animate All
-            </button>
-            <button id="reset-button" class="btn btn-secondary"> <span class="lucide">&#xe49a;</span> Reset Defaults
-            </button>
-        </div>
-
+        <!-- NEW: All-in-One Visualization Section -->
         <div class="section-card">
-            <h2 class="text-lg font-semibold text-slate-700 mb-3">Details (Selected Algorithm: <span
-                    id="selected-algo-details-title">FCFS</span>)</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
-                <p><strong>Processed Queue:</strong> <span id="request-sequence-display" class="font-mono"></span></p>
-                <p><strong>Serviced Order:</strong> <span id="serviced-order-display" class="font-mono"></span></p>
-                <p><strong>Total Movement:</strong> <span id="total-movement-display"
-                        class="font-mono text-indigo-600 font-semibold">0</span></p>
+            <h2 class="text-xl font-semibold text-slate-700 mb-4 text-center">All-in-One Visualization</h2>
+            <p class="text-center text-sm text-slate-500 mb-4">All algorithms animated simultaneously. Dashed lines
+                indicate non-servicing movements. Speed is inversely proportional to total head movement.</p>
+            <div class="all-in-one-container visualization-box">
+                <canvas id="all-in-one-canvas"></canvas>
+                <!-- Axis labels absolutely positioned relative to container -->
+                <span class="axis-label x-axis-label">Cylinder Number</span>
+                <span class="axis-label y-axis-label">Path Step Number</span> <!-- Changed Label -->
             </div>
-            <p id="message-box" class="text-red-600 font-medium mt-3 text-sm"></p>
+            <div id="all-in-one-legend" class="legend">
+                <!-- Legend items will be added dynamically -->
+            </div>
         </div>
 
+
+        <!-- Individual Trace Visualization Section -->
         <div class="section-card">
-            <h2 class="text-xl font-semibold text-slate-700 mb-6 text-center">Head Path Traces (Animated)</h2>
-            <div class="trace-grid"> </div>
+            <h2 class="text-xl font-semibold text-slate-700 mb-6 text-center">Individual Head Path Traces</h2>
+            <div class="trace-grid">
+                <!-- Canvas elements will be dynamically added here -->
+            </div>
         </div>
 
+        <!-- Comparison Section -->
         <div class="section-card comparison-container">
-            <h2 class="text-xl font-semibold text-slate-700 mb-4 text-center">Algorithm Comparison</h2>
+            <h2 class="text-xl font-semibold text-slate-700 mb-6 text-center">Algorithm Comparison</h2>
+            <!-- Comparison Metric Buttons -->
             <div class="mb-6">
-                <div class="flex justify-center flex-wrap gap-3 mb-4">
+                <div class="flex justify-center flex-wrap gap-3 mb-5">
                     <button id="compare-movement-btn" class="metric-button active">Total Head Movement</button>
-                    <button id="compare-avg-seek-btn" class="metric-button">Average Seek Time</button>
-                    <button id="compare-throughput-btn" class="metric-button">Throughput</button>
+                    <button id="compare-avg-seek-btn" class="metric-button">Average Seek Time (per Request)</button>
+                    <button id="compare-throughput-btn" class="metric-button">Throughput (Requests / Movement)</button>
                 </div>
-                <canvas id="comparison-graph-canvas"></canvas>
+                <!-- Comparison Graph -->
+                <div class="relative">
+                    <canvas id="comparison-graph-canvas"></canvas>
+                </div>
             </div>
+            <!-- Comparison Table -->
             <div>
-                <h3 class="text-lg font-semibold text-slate-700 mb-3 text-center">Comparison Summary</h3>
+                <h3 class="text-lg font-semibold text-slate-700 mb-4 text-center">Comparison Summary</h3>
                 <div class="overflow-x-auto">
                     <table class="comparison-table">
                         <thead>
@@ -340,6 +641,7 @@
                             </tr>
                         </thead>
                         <tbody id="comparison-table-body">
+                            <!-- Table rows will be dynamically added here -->
                         </tbody>
                     </table>
                 </div>
@@ -348,6 +650,11 @@
 
     </div>
 
+    <footer class="w-full max-w-7xl mx-auto text-center text-sm text-slate-500 py-6 mt-8">
+        Disk Scheduling Simulator - Review and check algorithm behavior carefully. Note: Avg Seek Time and Throughput
+        are calculated based on number of requests serviced, not total path steps.
+    </footer>
+
     <script>
         // --- DOM Elements ---
         const algorithmSelect = document.getElementById('algorithm-select');
@@ -355,11 +662,12 @@
         const maxCylinderInput = document.getElementById('max-cylinder');
         const requestQueueInput = document.getElementById('request-queue-input');
         const updateQueueButton = document.getElementById('update-queue-button');
-        const startButton = document.getElementById('start-button');
+        const startButton = document.getElementById('start-button'); // Individual traces button
         const resetButton = document.getElementById('reset-button');
         const requestSequenceDisplay = document.getElementById('request-sequence-display');
         const servicedOrderDisplay = document.getElementById('serviced-order-display');
         const totalMovementDisplay = document.getElementById('total-movement-display');
+        // const fullPathDisplay = document.getElementById('full-path-display'); // Optional
         const messageBox = document.getElementById('message-box');
         const traceGridContainer = document.querySelector('.trace-grid');
         const selectedAlgoDetailsTitle = document.getElementById('selected-algo-details-title');
@@ -368,124 +676,263 @@
         const compareMovementBtn = document.getElementById('compare-movement-btn');
         const compareAvgSeekBtn = document.getElementById('compare-avg-seek-btn');
         const compareThroughputBtn = document.getElementById('compare-throughput-btn');
-        const comparisonTableBody = document.getElementById('comparison-table-body'); // Table body element
+        const comparisonTableBody = document.getElementById('comparison-table-body');
+        const animationSpeedSelect = document.getElementById('animation-speed-select');
+        // New Elements for All-in-One Plot
+        const animateCombinedButton = document.getElementById('animate-combined-button');
+        const allInOneCanvas = document.getElementById('all-in-one-canvas');
+        const allInOneCtx = allInOneCanvas.getContext('2d');
+        const allInOneLegend = document.getElementById('all-in-one-legend');
+
 
         // --- Simulation State ---
         let currentRequests = [];
-        let initialHeadPosition = 50;
-        let maxCylinder = 500;
-        let animationTimeout = null;
-        let isAnimating = false;
+        let initialHeadPosition = 53; // Default to example
+        let maxCylinder = 199; // Default to example
+        let animationTimeout = null; // For individual traces setTimeout ID
+        let allInOneAnimationId = null; // For combined trace requestAnimationFrame ID
+        let isAnimatingIndividual = false;
+        let isAnimatingAllInOne = false;
+        // Stores { servicedOrder, totalMovement, fullPath, isServiceStop, avgSeekTime, throughput, requests }
         let allAlgorithmResults = {};
-        let traceCanvasContexts = {};
-        let maxAnimationSteps = 0;
+        let traceCanvasContexts = {}; // Stores { canvas, ctx } for each algorithm
+        let maxPathSteps = 0; // Maximum steps in the *full path* across all algorithms
         const algorithmOrder = ['FCFS', 'SSTF', 'SCAN', 'C-SCAN', 'LOOK', 'C-LOOK'];
-        const DEFAULT_QUEUE_STRING = "77, 66, 43, 90, 145, 421";
-        const DEFAULT_MAX_CYLINDER = 500;
-        let currentComparisonMetric = 'movement';
+        const DEFAULT_QUEUE_STRING = "98, 183, 37, 122, 14, 124, 65, 67"; // Example queue
+        const DEFAULT_START_HEAD = 53; // Example start
+        const DEFAULT_MAX_CYLINDER = 199; // Example max
+        const DEFAULT_ANIMATION_SPEED = "2";
+        let currentComparisonMetric = 'movement'; // 'movement', 'avgSeek', 'throughput'
+        let msPerUnitMovement = 2; // Milliseconds per unit of head movement for INDIVIDUAL animation speed
 
-        // --- Constants ---
-        const TRACE_PADDING = 40; const TRACE_POINT_RADIUS = 3; const TRACE_LINE_COLOR = '#3b82f6'; const TRACE_POINT_COLOR = '#ef4444'; const TRACE_GRID_COLOR = '#e2e8f0'; const TRACE_AXIS_COLOR = '#64748b'; const TRACE_LABEL_COLOR = '#475569'; const TRACE_CYLINDER_LABEL_COLOR = '#1e40af';
-        // --- MODIFICATION: Increased COMP_PADDING significantly for more space ---
-        const COMP_PADDING = 90; // Increased from 70
-        const COMP_BAR_COLOR = '#818cf8'; const COMP_AXIS_COLOR = '#334155'; const COMP_LABEL_COLOR = '#1e293b'; const COMP_GRID_COLOR = '#e2e8f0';
+        // --- Colors for All-in-One Plot ---
+        const ALGO_COLORS = {
+            'FCFS': '#34D399',   // Emerald 400
+            'SSTF': '#F87171',   // Red 400
+            'SCAN': '#60A5FA',   // Blue 400
+            'C-SCAN': '#FACC15', // Yellow 400
+            'LOOK': '#A78BFA',   // Violet 400
+            'C-LOOK': '#FB923C'  // Orange 400
+        };
+
+
+        // --- Constants for Drawing ---
+        // Individual Traces
+        const TRACE_PADDING = 40;
+        const TRACE_POINT_RADIUS = 3.5;
+        const TRACE_LINE_COLOR = '#3b82f6'; // blue-500
+        const TRACE_DASHED_LINE_COLOR = '#60a5fa'; // blue-400 (lighter for dashed)
+        const TRACE_POINT_COLOR = '#ef4444'; // red-500 (serviced stops)
+        const TRACE_NON_SERVICE_POINT_COLOR = '#fbbf24'; // amber-400 (boundary/jump stops)
+        const TRACE_GRID_COLOR = '#e2e8f0'; // slate-200
+        const TRACE_AXIS_COLOR = '#64748b'; // slate-500
+        const TRACE_LABEL_COLOR = '#475569'; // slate-600
+        const TRACE_CYLINDER_LABEL_COLOR = '#1e40af'; // blue-800
+        const DASH_PATTERN = [4, 4];
+
+        // Comparison Graph
+        const COMP_PADDING = 90;
+        const COMP_BAR_COLOR = '#818cf8'; // indigo-400
+        const COMP_AXIS_COLOR = '#334155'; // slate-700
+        const COMP_LABEL_COLOR = '#1e293b'; // slate-800
+        const COMP_GRID_COLOR = '#e2e8f0'; // slate-200
+        const COMP_BAR_VALUE_COLOR = '#4338ca'; // indigo-700
+
+        // All-in-One Plot
+        const AIO_PADDING = 50;
+        const AIO_BG_COLOR = '#1e293b'; // slate-800 (Darker bg)
+        const AIO_AXIS_COLOR = '#94a3b8'; // slate-400 (lighter for dark bg)
+        const AIO_GRID_COLOR = '#475569'; // slate-600
+        const AIO_LABEL_COLOR = '#e2e8f0'; // slate-200
+        const AIO_POINT_RADIUS = 3.5;
+        const AIO_LINE_WIDTH = 1.8;
+        const AIO_START_POINT_COLOR = '#f1f5f9'; // slate-100
+        const AIO_ALPHA = 0.75; // Base alpha for combined plot lines/points
+
+        // Animation Timing
+        const MIN_STEP_DURATION = 30; // Minimum ms per animation frame (prevents overly fast steps)
+        const MAX_STEP_DURATION = 800; // Maximum ms per animation frame (prevents very slow steps)
+        const AIO_BASE_TIME_SCALE = 50; // Controls overall speed of *combined* animation (lower is faster base speed)
+
 
         // --- Initialization ---
-        function initializeSimulation(resetInput = false) {
+        function initializeSimulation(resetToDefaults = false) {
+            console.log("Initializing simulation. Reset to defaults:", resetToDefaults);
             clearTimeout(animationTimeout);
-            isAnimating = false;
-            startButton.disabled = true;
-            startButton.innerHTML = '<span class="lucide">&#xe445;</span> Animate All';
+            cancelAnimationFrame(allInOneAnimationId);
+            isAnimatingIndividual = false;
+            isAnimatingAllInOne = false;
+
+            disableUI(false);
+            startButton.innerHTML = '<span class="lucide"></span> Animate Individual Traces';
+            animateCombinedButton.innerHTML = '<span class="lucide"></span> Animate Combined Plot';
+
             allAlgorithmResults = {};
             traceCanvasContexts = {};
-            maxAnimationSteps = 0;
-            traceGridContainer.innerHTML = '';
+            maxPathSteps = 0; // Reset max path steps
+            traceGridContainer.innerHTML = ''; // Clear old individual canvases
+            allInOneCtx.clearRect(0, 0, allInOneCanvas.width, allInOneCanvas.height); // Clear combined canvas
+            allInOneLegend.innerHTML = ''; // Clear legend
+            showMessage('');
 
-            if (resetInput) {
+            if (resetToDefaults) {
                 requestQueueInput.value = DEFAULT_QUEUE_STRING;
                 maxCylinderInput.value = DEFAULT_MAX_CYLINDER;
-                startHeadInput.value = 50;
+                startHeadInput.value = DEFAULT_START_HEAD;
+                algorithmSelect.value = 'FCFS';
+                animationSpeedSelect.value = DEFAULT_ANIMATION_SPEED;
             }
 
+            msPerUnitMovement = parseFloat(animationSpeedSelect.value) || 2;
             const selectedAlgorithmForDetails = algorithmSelect.value;
             initialHeadPosition = parseInt(startHeadInput.value, 10);
             maxCylinder = parseInt(maxCylinderInput.value, 10);
             selectedAlgoDetailsTitle.textContent = selectedAlgorithmForDetails;
 
-            // Input Validation
-            if (isNaN(maxCylinder) || maxCylinder <= 0) { showMessage("Error: Max cylinder must be a positive number."); disableSimulation(); return; }
-            if (isNaN(initialHeadPosition) || initialHeadPosition < 0 || initialHeadPosition > maxCylinder) { showMessage(`Error: Start head position must be between 0 and ${maxCylinder}.`); disableSimulation(); return; }
+            let isValid = true;
+            if (isNaN(maxCylinder) || maxCylinder <= 0) {
+                showMessage("Error: Max Cylinder must be a positive number.", true);
+                isValid = false;
+            }
+            if (isNaN(initialHeadPosition) || initialHeadPosition < 0 || initialHeadPosition > maxCylinder) {
+                showMessage(`Error: Start Head Position must be between 0 and ${maxCylinder}.`, true);
+                isValid = false;
+            }
 
-            // Parse Queue & Filter
-            let queueString = requestQueueInput.value.trim() || DEFAULT_QUEUE_STRING;
-            if (requestQueueInput.value.trim() === '') requestQueueInput.value = queueString;
-            showMessage(requestQueueInput.value.trim() === '' ? "Input queue empty, using default." : "");
+            let queueString = requestQueueInput.value.trim();
+            if (!queueString) {
+                if (!resetToDefaults) {
+                    showMessage("Input queue empty, using default: " + DEFAULT_QUEUE_STRING);
+                    queueString = DEFAULT_QUEUE_STRING;
+                    requestQueueInput.value = queueString;
+                } else {
+                    queueString = DEFAULT_QUEUE_STRING;
+                }
+            }
 
-            currentRequests = queueString.split(',').map(s => s.trim()).filter(s => s !== '').map(Number);
-            if (currentRequests.some(isNaN)) { showMessage("Error: Request queue contains non-numeric values."); disableSimulation(); return; }
+            currentRequests = queueString.split(',')
+                .map(s => s.trim())
+                .filter(s => s !== '')
+                .map(Number);
+
+            if (currentRequests.some(isNaN)) {
+                showMessage("Error: Request queue contains non-numeric values.", true);
+                isValid = false;
+            }
 
             const originalLength = currentRequests.length;
             currentRequests = currentRequests.filter(req => req >= 0 && req <= maxCylinder);
-            if (currentRequests.length !== originalLength && queueString !== DEFAULT_QUEUE_STRING) { showMessage("Note: Some requests were filtered out as they are outside the 0-" + maxCylinder + " range."); }
-            if (currentRequests.length === 0 && queueString !== DEFAULT_QUEUE_STRING) { showMessage("Warning: No valid requests in the queue within the 0-" + maxCylinder + " range."); }
+            if (currentRequests.length !== originalLength && isValid && queueString !== DEFAULT_QUEUE_STRING) {
+                showMessage(`Note: Some requests were filtered out as they are outside the 0-${maxCylinder} range.`);
+            }
+            if (currentRequests.length === 0 && isValid && queueString !== DEFAULT_QUEUE_STRING) {
+                showMessage(`Warning: No valid requests in the queue within the 0-${maxCylinder} range. Using empty queue.`);
+            }
+
             requestSequenceDisplay.textContent = currentRequests.join(', ') || 'None';
 
-            // Calculate Orders, Metrics & Setup Trace Canvases
-            let tempMaxSteps = 0;
-            const numStepsForAxis = currentRequests.length + 1;
+            if (!isValid) {
+                disableSimulation();
+                return;
+            }
+
+            // --- Calculate Results for ALL Algorithms ---
+            let tempMaxPathSteps = 0; // Use this to find max path length
             const numRequests = currentRequests.length;
 
             algorithmOrder.forEach(algoName => {
-                const { servicedOrder, totalMovement } = getServicingOrder(
+                // Get fullPath and isServiceStop along with other results
+                const { servicedOrder, totalMovement, fullPath, isServiceStop } = getServicingOrder(
                     algoName, initialHeadPosition, [...currentRequests], maxCylinder
                 );
                 const avgSeekTime = numRequests > 0 ? (totalMovement / numRequests) : 0;
-                const throughput = numRequests > 0 ? (numRequests / (totalMovement + 1)) : 0;
-                allAlgorithmResults[algoName] = { servicedOrder, totalMovement, avgSeekTime, throughput, requests: [...currentRequests] };
-                tempMaxSteps = Math.max(tempMaxSteps, servicedOrder.length);
+                // Avoid division by zero if movement is 0
+                const throughput = numRequests > 0 && totalMovement > 0 ? (numRequests / totalMovement) : (numRequests > 0 ? Infinity : 0);
+
+
+                allAlgorithmResults[algoName] = {
+                    requests: [...currentRequests], servicedOrder, totalMovement, fullPath, isServiceStop, avgSeekTime, throughput
+                };
+                tempMaxPathSteps = Math.max(tempMaxPathSteps, fullPath.length); // Find max path length
+
                 const { canvas, ctx } = createCanvasForAlgo(algoName, totalMovement);
                 traceCanvasContexts[algoName] = { canvas, ctx };
+
+                const legendItem = document.createElement('div');
+                legendItem.className = 'legend-item';
+                legendItem.innerHTML = `<span class="legend-color-box" style="background-color: ${hexToRgba(ALGO_COLORS[algoName], AIO_ALPHA)};"></span> ${algoName}`;
+                allInOneLegend.appendChild(legendItem);
             });
 
+            maxPathSteps = tempMaxPathSteps; // Max steps in the full path
+            console.log("Max Path Steps:", maxPathSteps);
+
             requestAnimationFrame(() => {
+                // Setup Individual Traces using maxPathSteps for axis scaling
                 algorithmOrder.forEach(algoName => {
                     if (traceCanvasContexts[algoName]) {
                         const { canvas, ctx } = traceCanvasContexts[algoName];
-                        setupTraceCanvas(canvas, ctx, numStepsForAxis, maxCylinder);
-                        drawInitialTracePoint(ctx, initialHeadPosition, numStepsForAxis, maxCylinder, canvas.width, canvas.height);
+                        if (canvas.offsetWidth > 0 && canvas.offsetHeight > 0) {
+                            setupTraceCanvas(canvas, ctx, maxPathSteps, maxCylinder); // Use maxPathSteps
+                            drawInitialTracePoint(ctx, initialHeadPosition, maxPathSteps, maxCylinder, canvas.width, canvas.height); // Use maxPathSteps
+                        } else {
+                            console.warn(`Individual canvas ${algoName} has zero dimensions. Skipping initial draw.`);
+                        }
                     }
                 });
+
+                // Setup All-in-One Trace using maxPathSteps
+                if (allInOneCanvas.offsetWidth > 0 && allInOneCanvas.offsetHeight > 0) {
+                    setupAllInOneCanvas(maxPathSteps, maxCylinder); // Use maxPathSteps
+                    drawAllInOneInitialPoint(initialHeadPosition, maxPathSteps, maxCylinder); // Use maxPathSteps
+                } else {
+                    console.warn("All-in-one canvas has zero dimensions. Skipping initial draw.");
+                }
+
                 drawComparisonGraph();
-                populateComparisonTable(); // Populate the table
+                populateComparisonTable();
             });
 
-            maxAnimationSteps = tempMaxSteps;
             updateDetailsDisplay(selectedAlgorithmForDetails);
-            startButton.disabled = false;
+            const hasRequests = currentRequests.length > 0;
+            disableUI(!hasRequests);
+            if (!hasRequests) {
+                showMessage("No requests to visualize or animate.");
+            }
         }
 
         function disableSimulation() {
-            startButton.disabled = true;
-            traceGridContainer.innerHTML = '<p class="text-center text-slate-500 col-span-full">Simulation disabled due to invalid input.</p>';
+            disableUI(true);
+            traceGridContainer.innerHTML = '<p class="text-center text-slate-500 col-span-full py-10">Simulation disabled due to invalid input. Please correct the configuration.</p>';
+            allInOneCtx.clearRect(0, 0, allInOneCanvas.width, allInOneCanvas.height);
+            allInOneLegend.innerHTML = '';
             comparisonCtx.clearRect(0, 0, comparisonCanvas.width, comparisonCanvas.height);
-            comparisonTableBody.innerHTML = '<tr><td colspan="4" class="text-center text-slate-500 py-4">Invalid input</td></tr>'; // Clear table
+            comparisonTableBody.innerHTML = '<tr><td colspan="4" class="text-center text-slate-500 py-4">Invalid input configuration</td></tr>';
+            requestSequenceDisplay.textContent = 'Invalid Input';
+            servicedOrderDisplay.textContent = 'N/A';
+            totalMovementDisplay.textContent = 'N/A';
+            // if (fullPathDisplay) fullPathDisplay.textContent = 'N/A';
         }
 
         function createCanvasForAlgo(algoName, totalMovement) {
             const traceItem = document.createElement('div');
             traceItem.className = 'trace-item';
             const title = document.createElement('h3');
-            title.textContent = `${algoName} (Movement: ${totalMovement})`;
+            title.textContent = `${algoName}`;
             traceItem.appendChild(title);
+            const movementText = document.createElement('p');
+            movementText.className = 'movement-info'; // Use specific class
+            movementText.innerHTML = `Movement: <strong>${totalMovement}</strong>`;
+            traceItem.appendChild(movementText);
             const canvasContainer = document.createElement('div');
             canvasContainer.className = 'visualization-box canvas-container w-full';
             const canvas = document.createElement('canvas');
-            canvas.id = `trace - canvas - ${algoName}`;
+            canvas.id = `trace-canvas-${algoName}`;
             canvas.className = 'trace-canvas';
             canvasContainer.appendChild(canvas);
             const yLabel = document.createElement('span');
             yLabel.className = 'axis-label y-axis-label';
-            yLabel.textContent = 'Step Number';
+            yLabel.textContent = 'Path Step Number'; // Changed Label
             canvasContainer.appendChild(yLabel);
             const xLabel = document.createElement('span');
             xLabel.className = 'axis-label x-axis-label';
@@ -499,172 +946,774 @@
 
         function updateDetailsDisplay(algoName) {
             const result = allAlgorithmResults[algoName];
-            servicedOrderDisplay.textContent = result?.servicedOrder?.join(', ') || 'N/A';
-            totalMovementDisplay.textContent = result?.totalMovement ?? 'N/A';
             selectedAlgoDetailsTitle.textContent = algoName;
-        }
-
-        // --- Drawing Functions (Trace Graphs - Unchanged) ---
-        function setupTraceCanvas(canvas, ctx, numTotalSteps, maxCylValue) { /* ... */ const currentWidth = canvas.offsetWidth; const currentHeight = canvas.offsetHeight; if (currentWidth > 0 && currentHeight > 0) { canvas.width = currentWidth; canvas.height = currentHeight; ctx.clearRect(0, 0, canvas.width, canvas.height); drawTraceAxes(ctx, canvas.width, canvas.height, numTotalSteps, maxCylValue); } else { console.warn("Canvas dimensions not available for setup:", canvas.id); } }
-        function drawTraceAxes(ctx, width, height, maxSteps, maxCyl) { /* ... */ ctx.strokeStyle = TRACE_AXIS_COLOR; ctx.fillStyle = TRACE_LABEL_COLOR; ctx.lineWidth = 1; ctx.font = '10px Inter, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; const plotHeight = height - 2 * TRACE_PADDING; ctx.beginPath(); ctx.moveTo(TRACE_PADDING, TRACE_PADDING); ctx.lineTo(TRACE_PADDING, height - TRACE_PADDING); ctx.stroke(); ctx.beginPath(); ctx.moveTo(TRACE_PADDING, height - TRACE_PADDING); ctx.lineTo(width - TRACE_PADDING, height - TRACE_PADDING); ctx.stroke(); const yLabelInterval = Math.max(1, Math.floor(maxSteps / 20)); for (let i = 0; i < maxSteps; i++) { const y = mapToTraceCanvas(i, 0, maxSteps, maxCyl, width, height).y; if (i % yLabelInterval === 0 || i === maxSteps - 1) { ctx.fillStyle = TRACE_LABEL_COLOR; ctx.textAlign = 'right'; ctx.fillText(i, TRACE_PADDING - 8, y); } ctx.strokeStyle = TRACE_GRID_COLOR; ctx.beginPath(); ctx.moveTo(TRACE_PADDING, y); ctx.lineTo(width - TRACE_PADDING, y); ctx.stroke(); } const plotWidth = width - 2 * TRACE_PADDING; const numTicks = Math.min(10, Math.floor(plotWidth / 60)); ctx.strokeStyle = TRACE_AXIS_COLOR; ctx.textAlign = 'center'; for (let i = 0; i <= numTicks; i++) { const cylinder = Math.round((i / numTicks) * maxCyl); const x = mapToTraceCanvas(0, cylinder, maxSteps, maxCyl, width, height).x; ctx.fillStyle = TRACE_LABEL_COLOR; ctx.fillText(cylinder, x, height - TRACE_PADDING + 15); } ctx.strokeStyle = TRACE_AXIS_COLOR; }
-        function mapToTraceCanvas(step, cylinder, maxSteps, maxCyl, canvasWidth, canvasHeight) { /* ... */ const plotWidth = canvasWidth - 2 * TRACE_PADDING; const plotHeight = canvasHeight - 2 * TRACE_PADDING; const yFactor = (maxSteps <= 1) ? 0 : step / (maxSteps - 1); const y = TRACE_PADDING + yFactor * plotHeight; const x = TRACE_PADDING + (cylinder / Math.max(1, maxCyl)) * plotWidth; return { x: Math.max(TRACE_PADDING, Math.min(canvasWidth - TRACE_PADDING, x)), y: Math.max(TRACE_PADDING, Math.min(canvasHeight - TRACE_PADDING, y)) }; }
-        function drawTraceSegment(ctx, step, prevCylinder, currentCylinder, maxSteps, maxCyl, width, height) { /* ... */ const startPoint = mapToTraceCanvas(step - 1, prevCylinder, maxSteps, maxCyl, width, height); const endPoint = mapToTraceCanvas(step, currentCylinder, maxSteps, maxCyl, width, height); ctx.strokeStyle = TRACE_LINE_COLOR; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(startPoint.x, startPoint.y); ctx.lineTo(endPoint.x, endPoint.y); ctx.stroke(); ctx.fillStyle = TRACE_POINT_COLOR; ctx.beginPath(); ctx.arc(endPoint.x, endPoint.y, TRACE_POINT_RADIUS, 0, Math.PI * 2); ctx.fill(); ctx.fillStyle = TRACE_CYLINDER_LABEL_COLOR; ctx.font = '9px Inter, sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom'; ctx.fillText(currentCylinder, endPoint.x + 5, endPoint.y - 5); }
-        function drawInitialTracePoint(ctx, cylinder, maxSteps, maxCyl, width, height) { /* ... */ const point = mapToTraceCanvas(0, cylinder, maxSteps, maxCyl, width, height); ctx.fillStyle = TRACE_POINT_COLOR; ctx.beginPath(); ctx.arc(point.x, point.y, TRACE_POINT_RADIUS, 0, Math.PI * 2); ctx.fill(); ctx.fillStyle = TRACE_CYLINDER_LABEL_COLOR; ctx.font = '9px Inter, sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom'; ctx.fillText(cylinder, point.x + 5, point.y - 5); }
-
-        // --- Algorithm Logic (Unchanged) ---
-        function getServicingOrder(algorithm, startHead, reqs, maxCyl) { /* ... [Identical logic] ... */
-            let currentHead = startHead; let requestsCopy = [...reqs]; let servicedOrder = []; let totalMovement = 0; let direction = 1; let sortedReqs = [...requestsCopy].sort((a, b) => a - b);
-            switch (algorithm) {
-                case 'FCFS': requestsCopy.forEach(req => { totalMovement += Math.abs(req - currentHead); currentHead = req; servicedOrder.push(req); }); break;
-                case 'SSTF': let sstfReqs = requestsCopy.map((r, i) => ({ val: r, id: i })); while (sstfReqs.length > 0) { let closestReqIndex = -1; let minDistance = Infinity; sstfReqs.forEach((req, index) => { const distance = Math.abs(req.val - currentHead); if (distance < minDistance) { minDistance = distance; closestReqIndex = index; } }); const closestReq = sstfReqs[closestReqIndex].val; totalMovement += minDistance; currentHead = closestReq; servicedOrder.push(currentHead); sstfReqs.splice(closestReqIndex, 1); } break;
-                case 'SCAN': { direction = (currentHead === maxCyl || !sortedReqs.some(r => r >= currentHead)) ? -1 : 1; if (direction === 1) { let rightRequests = sortedReqs.filter(r => r >= currentHead); rightRequests.forEach(req => { totalMovement += Math.abs(req - currentHead); currentHead = req; servicedOrder.push(currentHead); }); if (sortedReqs.length > 0 && currentHead !== maxCyl) { totalMovement += Math.abs(maxCyl - currentHead); currentHead = maxCyl; } let leftRequests = sortedReqs.filter(r => r < initialHeadPosition).sort((a, b) => b - a); leftRequests.forEach(req => { totalMovement += Math.abs(req - currentHead); currentHead = req; servicedOrder.push(currentHead); }); } else { let leftRequests = sortedReqs.filter(r => r <= currentHead).sort((a, b) => b - a); leftRequests.forEach(req => { totalMovement += Math.abs(req - currentHead); currentHead = req; servicedOrder.push(currentHead); }); if (sortedReqs.length > 0 && currentHead !== 0) { totalMovement += Math.abs(0 - currentHead); currentHead = 0; } let rightRequests = sortedReqs.filter(r => r > initialHeadPosition).sort((a, b) => a - b); rightRequests.forEach(req => { totalMovement += Math.abs(req - currentHead); currentHead = req; servicedOrder.push(currentHead); }); } break; }
-                case 'C-SCAN': { let rightRequests = sortedReqs.filter(r => r >= currentHead); rightRequests.forEach(req => { totalMovement += Math.abs(req - currentHead); currentHead = req; servicedOrder.push(currentHead); }); if (sortedReqs.some(r => r < initialHeadPosition)) { if (currentHead !== maxCyl) { totalMovement += Math.abs(maxCyl - currentHead); currentHead = maxCyl; } totalMovement += maxCyl; currentHead = 0; let leftRequests = sortedReqs.filter(r => r < initialHeadPosition); leftRequests.forEach(req => { totalMovement += Math.abs(req - currentHead); currentHead = req; servicedOrder.push(currentHead); }); } break; }
-                case 'LOOK': { direction = (currentHead === (sortedReqs[sortedReqs.length - 1] ?? currentHead) || !sortedReqs.some(r => r > currentHead)) ? -1 : 1; if (direction === 1) { let rightRequests = sortedReqs.filter(r => r >= currentHead); rightRequests.forEach(req => { totalMovement += Math.abs(req - currentHead); currentHead = req; servicedOrder.push(currentHead); }); let leftRequests = sortedReqs.filter(r => r < initialHeadPosition).sort((a, b) => b - a); leftRequests.forEach(req => { totalMovement += Math.abs(req - currentHead); currentHead = req; servicedOrder.push(currentHead); }); } else { let leftRequests = sortedReqs.filter(r => r <= currentHead).sort((a, b) => b - a); leftRequests.forEach(req => { totalMovement += Math.abs(req - currentHead); currentHead = req; servicedOrder.push(currentHead); }); let rightRequests = sortedReqs.filter(r => r > initialHeadPosition).sort((a, b) => a - b); rightRequests.forEach(req => { totalMovement += Math.abs(req - currentHead); currentHead = req; servicedOrder.push(currentHead); }); } break; }
-                case 'C-LOOK': { let rightRequests = sortedReqs.filter(r => r >= currentHead); rightRequests.forEach(req => { totalMovement += Math.abs(req - currentHead); currentHead = req; servicedOrder.push(currentHead); }); let leftRequests = sortedReqs.filter(r => r < initialHeadPosition); if (leftRequests.length > 0) { currentHead = sortedReqs[0]; leftRequests.forEach(req => { if (!servicedOrder.includes(req)) { totalMovement += Math.abs(req - currentHead); currentHead = req; servicedOrder.push(currentHead); } }); } break; }
-            } return { servicedOrder, totalMovement };
-        }
-
-        // --- Animation (Drives ALL Trace Graphs - Unchanged) ---
-        function animateMovement() { /* ... [Identical logic] ... */
-            if (isAnimating) return; if (maxAnimationSteps === 0 && currentRequests.length > 0) { showMessage("Error during calculation, cannot animate."); return; } if (maxAnimationSteps === 0 && currentRequests.length === 0) { showMessage("No requests to animate."); return; }
-            isAnimating = true; startButton.disabled = true; startButton.innerHTML = '<span class="lucide">&#xe43b;</span> Animating...'; showMessage("Animation running...");
-            let currentAnimationStep = 0; const animationSpeed = 500; const numTotalStepsForAxis = currentRequests.length + 1; let prevPositions = {}; algorithmOrder.forEach(algoName => { prevPositions[algoName] = initialHeadPosition; });
-            algorithmOrder.forEach(algoName => { if (traceCanvasContexts[algoName]) { const { canvas, ctx } = traceCanvasContexts[algoName]; requestAnimationFrame(() => { setupTraceCanvas(canvas, ctx, numTotalStepsForAxis, maxCylinder); drawInitialTracePoint(ctx, initialHeadPosition, numTotalStepsForAxis, maxCylinder, canvas.width, canvas.height); }); } });
-            function step() { if (currentAnimationStep >= maxAnimationSteps) { isAnimating = false; startButton.disabled = false; startButton.innerHTML = '<span class="lucide">&#xe445;</span> Animate All'; showMessage("Animation complete."); return; } const drawingStep = currentAnimationStep + 1; algorithmOrder.forEach(algoName => { const result = allAlgorithmResults[algoName]; const order = result?.servicedOrder; const contextInfo = traceCanvasContexts[algoName]; if (order && contextInfo && currentAnimationStep < order.length) { const { canvas, ctx } = contextInfo; const currentTrack = order[currentAnimationStep]; const prevTrack = prevPositions[algoName]; if (canvas.width > 0 && canvas.height > 0) { drawTraceSegment(ctx, drawingStep, prevTrack, currentTrack, numTotalStepsForAxis, maxCylinder, canvas.width, canvas.height); prevPositions[algoName] = currentTrack; } } }); currentAnimationStep++; animationTimeout = setTimeout(step, animationSpeed); } setTimeout(step, 50);
-        }
-
-        // --- Comparison Graph Drawing (Adjusted Y-Axis Title Spacing) ---
-        function drawComparisonGraph() {
-            const canvas = comparisonCanvas;
-            const ctx = comparisonCtx;
-            const width = canvas.offsetWidth;
-            const height = canvas.offsetHeight;
-
-            if (width <= 0 || height <= 0) { requestAnimationFrame(drawComparisonGraph); return; }
-
-            canvas.width = width;
-            canvas.height = height;
-            ctx.clearRect(0, 0, width, height);
-
-            let data = [];
-            let maxValue = 0;
-            let yAxisLabel = "";
-            let valueFormatPrecision = 0;
-
-            if (currentComparisonMetric === 'movement') {
-                yAxisLabel = "Total Head Movement"; valueFormatPrecision = 0;
-                algorithmOrder.forEach(algoName => { const value = allAlgorithmResults[algoName]?.totalMovement ?? 0; data.push({ label: algoName, value: value }); maxValue = Math.max(maxValue, value); });
-            } else if (currentComparisonMetric === 'avgSeek') {
-                yAxisLabel = "Average Seek Time"; valueFormatPrecision = 2;
-                algorithmOrder.forEach(algoName => { const value = allAlgorithmResults[algoName]?.avgSeekTime ?? 0; data.push({ label: algoName, value: value }); maxValue = Math.max(maxValue, value); });
-            } else { // throughput
-                yAxisLabel = "Throughput (Reqs / (Movement+1))"; valueFormatPrecision = 4;
-                algorithmOrder.forEach(algoName => { const value = allAlgorithmResults[algoName]?.throughput ?? 0; data.push({ label: algoName, value: value }); maxValue = Math.max(maxValue, value); });
+            if (result) {
+                servicedOrderDisplay.textContent = result.servicedOrder.join(', ') || 'None';
+                totalMovementDisplay.textContent = result.totalMovement.toFixed(0);
+                // Optional display:
+                // if (fullPathDisplay) fullPathDisplay.textContent = result.fullPath.map((p, i) => `${p}${result.isServiceStop[i] ? '' : '*'}`).join(', ');
+            } else {
+                servicedOrderDisplay.textContent = 'N/A';
+                totalMovementDisplay.textContent = 'N/A';
+                // if (fullPathDisplay) fullPathDisplay.textContent = 'N/A';
             }
+        }
 
-            if (maxValue === 0) maxValue = (currentComparisonMetric === 'throughput' ? 1 : 10);
+        // --- Drawing Functions (Individual Trace Graphs) ---
+        // Use maxTotalPathSteps for Y-axis scaling
+        function setupTraceCanvas(canvas, ctx, maxTotalPathSteps, maxCylValue) { const currentWidth = canvas.offsetWidth; const currentHeight = canvas.offsetHeight; if (currentWidth > 0 && currentHeight > 0) { canvas.width = currentWidth; canvas.height = currentHeight; ctx.clearRect(0, 0, canvas.width, canvas.height); drawTraceAxes(ctx, canvas.width, canvas.height, maxTotalPathSteps, maxCylValue); } else { console.warn("Canvas dimensions not available for setup:", canvas.id); } }
+        function drawTraceAxes(ctx, width, height, maxSteps, maxCyl) { ctx.save(); ctx.strokeStyle = TRACE_AXIS_COLOR; ctx.fillStyle = TRACE_LABEL_COLOR; ctx.lineWidth = 1; ctx.font = '10px Inter, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; const plotHeight = height - 2 * TRACE_PADDING; const plotWidth = width - 2 * TRACE_PADDING; ctx.beginPath(); ctx.moveTo(TRACE_PADDING, TRACE_PADDING); ctx.lineTo(TRACE_PADDING, height - TRACE_PADDING); ctx.stroke(); ctx.beginPath(); ctx.moveTo(TRACE_PADDING, height - TRACE_PADDING); ctx.lineTo(width - TRACE_PADDING, height - TRACE_PADDING); ctx.stroke(); const yLabelInterval = Math.max(1, Math.ceil(maxSteps / 15)); for (let i = 0; i < maxSteps; i++) { const y = mapToTraceCanvas(i, 0, maxSteps, maxCyl, width, height).y; if (i % yLabelInterval === 0 || i === maxSteps - 1) { ctx.fillStyle = TRACE_LABEL_COLOR; ctx.textAlign = 'right'; ctx.fillText(i, TRACE_PADDING - 8, y); } ctx.strokeStyle = TRACE_GRID_COLOR; ctx.lineWidth = 0.5; ctx.beginPath(); ctx.moveTo(TRACE_PADDING + 1, y); ctx.lineTo(width - TRACE_PADDING, y); ctx.stroke(); } const numXTicks = Math.min(10, Math.floor(plotWidth / 50)); ctx.textAlign = 'center'; ctx.textBaseline = 'top'; for (let i = 0; i <= numXTicks; i++) { const cylinder = Math.round((i / numXTicks) * maxCyl); const x = mapToTraceCanvas(0, cylinder, maxSteps, maxCyl, width, height).x; ctx.strokeStyle = TRACE_AXIS_COLOR; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x, height - TRACE_PADDING); ctx.lineTo(x, height - TRACE_PADDING + 5); ctx.stroke(); ctx.fillStyle = TRACE_LABEL_COLOR; ctx.fillText(cylinder, x, height - TRACE_PADDING + 8); } ctx.restore(); }
+        // mapToTraceCanvas uses maxTotalPathSteps for Y scaling
+        function mapToTraceCanvas(stepIndex, cylinder, maxTotalPathSteps, maxCyl, canvasWidth, canvasHeight) { const plotWidth = canvasWidth - 2 * TRACE_PADDING; const plotHeight = canvasHeight - 2 * TRACE_PADDING; const yFactor = (maxTotalPathSteps <= 1) ? 0 : stepIndex / (maxTotalPathSteps - 1); const y = TRACE_PADDING + yFactor * plotHeight; const x = TRACE_PADDING + (cylinder / Math.max(1, maxCyl)) * plotWidth; return { x: Math.max(TRACE_PADDING, Math.min(canvasWidth - TRACE_PADDING, x)), y: Math.max(TRACE_PADDING, Math.min(canvasHeight - TRACE_PADDING, y)) }; }
 
-            // Use the increased COMP_PADDING value here
-            const plotWidth = width - 2 * COMP_PADDING;
-            const plotHeight = height - 2 * COMP_PADDING;
-            const barTotalSpace = plotWidth / data.length;
-            const barSpacing = barTotalSpace * 0.3;
-            const barWidth = barTotalSpace * 0.7;
+        // **MODIFIED drawTraceSegment** to accept isServiceEndPoint and draw dashed lines
+        function drawTraceSegment(ctx, stepIndex, prevCylinder, currentCylinder, maxTotalPathSteps, maxCyl, width, height, isServiceEndPoint) {
+            if (width <= 0 || height <= 0 || stepIndex === 0) return; // Don't draw segment for step 0
 
-            // Draw Axes
-            ctx.strokeStyle = COMP_AXIS_COLOR; ctx.lineWidth = 1; ctx.font = '11px Inter, sans-serif';
-            ctx.beginPath(); ctx.moveTo(COMP_PADDING, COMP_PADDING); ctx.lineTo(COMP_PADDING, height - COMP_PADDING); ctx.stroke(); // Y-Axis Line
-            ctx.beginPath(); ctx.moveTo(COMP_PADDING, height - COMP_PADDING); ctx.lineTo(width - COMP_PADDING, height - COMP_PADDING); ctx.stroke(); // X-Axis Line
+            const startPoint = mapToTraceCanvas(stepIndex - 1, prevCylinder, maxTotalPathSteps, maxCyl, width, height);
+            const endPoint = mapToTraceCanvas(stepIndex, currentCylinder, maxTotalPathSteps, maxCyl, width, height);
 
-            // Draw Y Axis Labels and Grid Lines
-            const numYTicks = 5;
-            ctx.fillStyle = COMP_LABEL_COLOR; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
-            for (let i = 0; i <= numYTicks; i++) {
-                const value = (maxValue / numYTicks) * i;
-                const y = height - COMP_PADDING - (value / maxValue) * plotHeight;
-                // Use increased COMP_PADDING here, keep label offset consistent relative to the axis line
-                ctx.fillText(value.toFixed(valueFormatPrecision), COMP_PADDING - 12, y);
-                ctx.strokeStyle = COMP_GRID_COLOR; ctx.beginPath(); ctx.moveTo(COMP_PADDING + 1, y); ctx.lineTo(width - COMP_PADDING, y); ctx.stroke();
-            }
-            // Y Axis Title
             ctx.save();
-            // --- MODIFICATION: Adjusted Y-axis title position for increased padding ---
-            ctx.translate(COMP_PADDING * 0.35, height / 2); // Adjusted multiplier slightly
-            ctx.rotate(-Math.PI / 2); ctx.textAlign = 'center'; ctx.font = '12px Inter, sans-serif'; ctx.fillText(yAxisLabel, 0, 0); ctx.restore();
+            ctx.lineWidth = 1.5;
 
-            // Draw Bars and X Axis Labels
-            ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.font = '11px Inter, sans-serif';
-            data.forEach((item, index) => {
-                const x = COMP_PADDING + barSpacing / 2 + index * barTotalSpace;
-                const barHeight = (item.value / maxValue) * plotHeight;
-                const y = height - COMP_PADDING - barHeight;
-                // Ensure alignment by using calculated x and width
-                ctx.fillStyle = COMP_BAR_COLOR; ctx.fillRect(x, y, barWidth, barHeight);
-                ctx.fillStyle = COMP_LABEL_COLOR;
-                // Ensure text alignment is centered and y position is consistent
-                ctx.fillText(item.label, x + barWidth / 2, height - COMP_PADDING + 12);
-                ctx.fillStyle = COMP_LABEL_COLOR; ctx.textBaseline = 'bottom'; ctx.font = '10px Inter, sans-serif';
-                ctx.fillText(item.value.toFixed(valueFormatPrecision), x + barWidth / 2, y - 4);
+            // Set line style based on whether the endpoint is a service stop
+            if (isServiceEndPoint) {
+                ctx.setLineDash([]); // Solid line
+                ctx.strokeStyle = TRACE_LINE_COLOR;
+            } else {
+                ctx.setLineDash(DASH_PATTERN); // Dashed line
+                ctx.strokeStyle = TRACE_DASHED_LINE_COLOR; // Optional: different color for dashed
+            }
+
+            // Draw the line segment
+            ctx.beginPath();
+            ctx.moveTo(startPoint.x, startPoint.y);
+            ctx.lineTo(endPoint.x, endPoint.y);
+            ctx.stroke();
+
+            // Reset line dash for other drawing (like points)
+            ctx.setLineDash([]);
+
+            // Determine point color based on service stop
+            let pointColor = isServiceEndPoint ? TRACE_POINT_COLOR : TRACE_NON_SERVICE_POINT_COLOR;
+
+            ctx.fillStyle = pointColor;
+            ctx.beginPath();
+            ctx.arc(endPoint.x, endPoint.y, TRACE_POINT_RADIUS, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Always label the cylinder number at the end point
+            ctx.fillStyle = TRACE_CYLINDER_LABEL_COLOR;
+            ctx.font = '9px Inter, sans-serif';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'bottom';
+            // Avoid label collision by slightly adjusting position based on direction
+            const labelOffsetX = 5;
+            const labelOffsetY = (endPoint.y < startPoint.y) ? 5 : -5; // Above if moving down, below if moving up
+            ctx.fillText(currentCylinder, endPoint.x + labelOffsetX, endPoint.y + labelOffsetY);
+
+            ctx.restore();
+        }
+
+        // drawInitialTracePoint uses maxTotalPathSteps
+        function drawInitialTracePoint(ctx, cylinder, maxTotalPathSteps, maxCyl, width, height) {
+            if (width <= 0 || height <= 0) return;
+            const point = mapToTraceCanvas(0, cylinder, maxTotalPathSteps, maxCyl, width, height); // Step index is 0
+            ctx.save();
+            // Start point is conceptually a non-service point
+            ctx.fillStyle = TRACE_NON_SERVICE_POINT_COLOR;
+            ctx.beginPath();
+            ctx.arc(point.x, point.y, TRACE_POINT_RADIUS, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = TRACE_CYLINDER_LABEL_COLOR;
+            ctx.font = 'bold 10px Inter, sans-serif';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'bottom';
+            ctx.fillText(`Start: ${cylinder}`, point.x + 5, point.y - 5);
+            ctx.restore();
+        }
+
+        // --- Disk Scheduling Algorithm Logic ---
+        // **MODIFIED to return { servicedOrder, totalMovement, fullPath, isServiceStop }**
+        function getServicingOrder(algorithm, startHead, reqs, maxCyl) {
+            let currentHead = startHead;
+            let requestsCopy = [...reqs];
+            let servicedOrder = [];
+            let fullPath = [startHead]; // Path starts with the initial head position
+            let isServiceStop = [false]; // The start position is not a service stop
+            let totalMovement = 0;
+
+            if (requestsCopy.length === 0) {
+                return { servicedOrder: [], totalMovement: 0, fullPath: [startHead], isServiceStop: [false] };
+            }
+
+            let sortedReqs = [...requestsCopy].sort((a, b) => a - b);
+
+            switch (algorithm) {
+                case 'FCFS': {
+                    requestsCopy.forEach(req => {
+                        totalMovement += Math.abs(req - currentHead);
+                        currentHead = req;
+                        servicedOrder.push(req);
+                        fullPath.push(req);
+                        isServiceStop.push(true); // FCFS stops are service stops
+                    });
+                    break;
+                }
+                case 'SSTF': {
+                    let remainingReqs = [...requestsCopy];
+                    while (remainingReqs.length > 0) {
+                        let closestReqIndex = -1; let minDistance = Infinity;
+                        remainingReqs.forEach((req, index) => { const distance = Math.abs(req - currentHead); if (distance < minDistance) { minDistance = distance; closestReqIndex = index; } else if (distance === minDistance) { if (req < remainingReqs[closestReqIndex]) { closestReqIndex = index; } } });
+                        if (closestReqIndex !== -1) { const closestReq = remainingReqs[closestReqIndex]; totalMovement += minDistance; currentHead = closestReq; servicedOrder.push(currentHead); fullPath.push(currentHead); isServiceStop.push(true); remainingReqs.splice(closestReqIndex, 1); } else { console.error("SSTF Error"); break; }
+                    }
+                    break;
+                }
+                case 'SCAN': { // <<< MODIFIED SCAN LOGIC >>>
+                    let direction;
+                    // Determine initial direction: Go towards the closest boundary if no requests are immediately in that direction
+                    const requestsLeft = sortedReqs.some(r => r <= startHead);
+                    const requestsRight = sortedReqs.some(r => r >= startHead);
+
+                    if (!requestsLeft && requestsRight) {
+                        direction = 1; // Must go right
+                    } else if (requestsLeft && !requestsRight) {
+                        direction = -1; // Must go left
+                    } else if (!requestsLeft && !requestsRight) {
+                        direction = 1; // No requests, direction doesn't matter but set one
+                    }
+                    else {
+                        // Go towards the nearest boundary as a default tie-breaker if requests exist both ways
+                        direction = (Math.abs(startHead - 0) <= Math.abs(maxCyl - startHead)) ? -1 : 1;
+                    }
+
+
+                    let scanReqs = [...sortedReqs]; // Use a mutable copy
+
+                    while (scanReqs.length > 0) {
+                        if (direction === 1) { // Moving towards maxCyl
+                            let targets = scanReqs.filter(r => r >= currentHead).sort((a, b) => a - b);
+                            targets.forEach(req => {
+                                totalMovement += Math.abs(req - currentHead);
+                                currentHead = req;
+                                servicedOrder.push(currentHead);
+                                fullPath.push(currentHead);
+                                isServiceStop.push(true);
+                                scanReqs.splice(scanReqs.indexOf(req), 1); // Remove from the mutable list
+                            });
+
+                            // Check if we need to reverse
+                            if (scanReqs.length > 0) { // If requests remain (must be to the left)
+                                if (currentHead !== maxCyl) {
+                                    totalMovement += Math.abs(maxCyl - currentHead); // Move to boundary
+                                    currentHead = maxCyl;
+                                    fullPath.push(currentHead);
+                                    isServiceStop.push(false); // Boundary hit is not a service
+                                }
+                                direction = -1; // Reverse direction
+                            } else {
+                                break; // No requests left, stop at the last serviced request
+                            }
+                        } else { // Moving towards 0 (direction === -1)
+                            let targets = scanReqs.filter(r => r <= currentHead).sort((a, b) => b - a); // Sort descending
+                            targets.forEach(req => {
+                                totalMovement += Math.abs(req - currentHead);
+                                currentHead = req;
+                                servicedOrder.push(currentHead);
+                                fullPath.push(currentHead);
+                                isServiceStop.push(true);
+                                scanReqs.splice(scanReqs.indexOf(req), 1); // Remove from the mutable list
+                            });
+
+                            // Check if we need to reverse
+                            if (scanReqs.length > 0) { // If requests remain (must be to the right)
+                                if (currentHead !== 0) {
+                                    totalMovement += Math.abs(0 - currentHead); // Move to boundary
+                                    currentHead = 0;
+                                    fullPath.push(currentHead);
+                                    isServiceStop.push(false); // Boundary hit is not a service
+                                }
+                                direction = 1; // Reverse direction
+                            } else {
+                                break; // No requests left, stop at the last serviced request
+                            }
+                        }
+                    }
+                    break; // <<< END OF MODIFIED SCAN >>>
+                }
+                case 'C-SCAN': {
+                    let cscanReqs = [...sortedReqs];
+                    let rightRequests = cscanReqs.filter(r => r >= currentHead).sort((a, b) => a - b);
+                    let leftRequests = cscanReqs.filter(r => r < currentHead).sort((a, b) => a - b);
+
+                    // Service requests >= currentHead
+                    rightRequests.forEach(req => {
+                        totalMovement += Math.abs(req - currentHead);
+                        currentHead = req;
+                        servicedOrder.push(currentHead);
+                        fullPath.push(currentHead);
+                        isServiceStop.push(true);
+                        cscanReqs.splice(cscanReqs.indexOf(req), 1); // Remove
+                    });
+
+                    // If there are requests remaining (must be < startHead initially)
+                    if (cscanReqs.length > 0) {
+                        // Move to maxCyl if not already there
+                        if (currentHead !== maxCyl) {
+                            totalMovement += Math.abs(maxCyl - currentHead);
+                            currentHead = maxCyl;
+                            fullPath.push(currentHead);
+                            isServiceStop.push(false); // Boundary hit
+                        }
+                        // Jump to 0
+                        totalMovement += maxCyl; // Movement for the jump across the disk
+                        currentHead = 0;
+                        fullPath.push(currentHead);
+                        isServiceStop.push(false); // Jump destination
+
+                        // Service the remaining requests (which were originally < startHead)
+                        cscanReqs.sort((a, b) => a - b).forEach(req => { // Process them in increasing order from 0
+                            totalMovement += Math.abs(req - currentHead);
+                            currentHead = req;
+                            servicedOrder.push(currentHead);
+                            fullPath.push(currentHead);
+                            isServiceStop.push(true);
+                        });
+                    } else {
+                        // If no requests were to the left, check if we still need to sweep to maxCyl
+                        // This case is typically handled because rightRequests would have taken us to the last request > startHead
+                        // If startHead itself was the highest request, we don't need to move further.
+                        // The original code implicitly handled this by moving to maxCyl only if requests remained.
+                        // Let's refine: If there were right requests, we ended at the last one.
+                        // If there were *no* right requests, we didn't move right.
+                        // Only add the maxCyl boundary if we actually moved right and there were left requests.
+                        // The logic above correctly handles this.
+                    }
+                    break;
+                }
+                case 'LOOK': {
+                    const minReq = sortedReqs.length > 0 ? sortedReqs[0] : startHead;
+                    const maxReq = sortedReqs.length > 0 ? sortedReqs[sortedReqs.length - 1] : startHead;
+
+                    let direction;
+                    // Determine initial direction logic similar to SCAN
+                    const requestsLeft = sortedReqs.some(r => r <= startHead);
+                    const requestsRight = sortedReqs.some(r => r >= startHead);
+
+                    if (!requestsLeft && requestsRight) direction = 1;
+                    else if (requestsLeft && !requestsRight) direction = -1;
+                    else if (!requestsLeft && !requestsRight) direction = 1; // No requests
+                    else { // Requests both ways - default based on position relative to ends? Or just pick one? Let's default like SCAN
+                        direction = (startHead <= (minReq + maxReq) / 2) ? 1 : -1; // Tend towards center
+                    }
+                    // Ensure the chosen direction actually has requests
+                    if (direction === 1 && !requestsRight) direction = -1;
+                    if (direction === -1 && !requestsLeft) direction = 1;
+
+
+                    let lookReqs = [...sortedReqs];
+                    while (lookReqs.length > 0) {
+                        if (direction === 1) { // Moving right
+                            let targets = lookReqs.filter(r => r >= currentHead).sort((a, b) => a - b);
+                            if (targets.length === 0) { // Should only happen if direction logic error or only left requests remain
+                                direction = -1; // Change direction
+                                continue;
+                            }
+                            targets.forEach(req => {
+                                totalMovement += Math.abs(req - currentHead);
+                                currentHead = req;
+                                servicedOrder.push(currentHead);
+                                fullPath.push(currentHead);
+                                isServiceStop.push(true);
+                                lookReqs.splice(lookReqs.indexOf(req), 1);
+                            });
+                            direction = -1; // LOOK reverses immediately after last request in direction
+                        } else { // Moving left (direction === -1)
+                            let targets = lookReqs.filter(r => r <= currentHead).sort((a, b) => b - a);
+                            if (targets.length === 0) {
+                                direction = 1; // Change direction
+                                continue;
+                            }
+                            targets.forEach(req => {
+                                totalMovement += Math.abs(req - currentHead);
+                                currentHead = req;
+                                servicedOrder.push(currentHead);
+                                fullPath.push(currentHead);
+                                isServiceStop.push(true);
+                                lookReqs.splice(lookReqs.indexOf(req), 1);
+                            });
+                            direction = 1; // LOOK reverses immediately
+                        }
+                    }
+                    break;
+                }
+                case 'C-LOOK': {
+                    if (sortedReqs.length === 0) break;
+                    let clookReqs = [...sortedReqs]; // Mutable copy
+                    let rightPartition = clookReqs.filter(r => r >= currentHead).sort((a, b) => a - b);
+                    let leftPartition = clookReqs.filter(r => r < currentHead).sort((a, b) => a - b);
+
+                    // Process requests >= currentHead first
+                    rightPartition.forEach(req => {
+                        totalMovement += Math.abs(req - currentHead);
+                        currentHead = req;
+                        servicedOrder.push(currentHead);
+                        fullPath.push(currentHead);
+                        isServiceStop.push(true);
+                        clookReqs.splice(clookReqs.indexOf(req), 1); // Remove
+                    });
+
+                    // If there are still requests (must be in the left partition)
+                    if (clookReqs.length > 0) {
+                        // Jump directly to the lowest request number overall (which is now the lowest in clookReqs)
+                        const jumpTarget = clookReqs[0]; // clookReqs only contains left requests now, already sorted asc
+                        // Note: C-LOOK doesn't add movement for the jump itself, just seeks from last right point to first left point
+                        totalMovement += Math.abs(jumpTarget - currentHead);
+                        currentHead = jumpTarget;
+                        fullPath.push(currentHead);
+                        isServiceStop.push(true); // The first request after the jump IS a service stop
+                        servicedOrder.push(currentHead);
+                        clookReqs.splice(0, 1); // Remove the first one we just serviced
+
+                        // Service remaining left requests in ascending order
+                        clookReqs.forEach(req => { // Process remaining requests which are > jumpTarget
+                            totalMovement += Math.abs(req - currentHead);
+                            currentHead = req;
+                            servicedOrder.push(currentHead);
+                            fullPath.push(currentHead);
+                            isServiceStop.push(true);
+                        });
+                    }
+                    // If clookReqs.length was 0 after processing rightPartition, we are done.
+                    break;
+                }
+                default:
+                    console.error("Unknown algorithm:", algorithm);
+                    return { servicedOrder: [], totalMovement: 0, fullPath: [startHead], isServiceStop: [false] };
+            }
+
+            if (servicedOrder.length !== requestsCopy.length && requestsCopy.length > 0) { console.warn(`Algorithm ${algorithm} serviced ${servicedOrder.length}/${requestsCopy.length} requests.`); }
+            if (fullPath.length === 0 && startHead !== undefined) { fullPath = [startHead]; isServiceStop = [false]; }
+
+            return { servicedOrder, totalMovement, fullPath, isServiceStop }; // Return the new structure
+        }
+
+
+        // --- Animation Control (Individual Traces) ---
+        function animateMovement() {
+            if (isAnimatingIndividual || isAnimatingAllInOne) return;
+            if (currentRequests.length === 0) { showMessage("No requests to animate."); return; }
+            if (maxPathSteps <= 1 && currentRequests.length > 0) { showMessage("Error during calculation (maxPathSteps <= 1), cannot animate. Please Update & Reset.", true); return; }
+
+            console.log("Starting individual trace animation...");
+            isAnimatingIndividual = true;
+            disableUI(true);
+            startButton.innerHTML = '<span class="lucide"></span> Animating Individuals...';
+            showMessage("Individual trace animation running...");
+
+            msPerUnitMovement = parseFloat(animationSpeedSelect.value) || 2;
+            let currentAnimationPathStep = 0; // Step index in the fullPath array (0 to N-1)
+            const totalSegmentsToAnimate = maxPathSteps - 1; // Animate N-1 segments for N points
+
+            // Use the selected algorithm to determine animation step timing
+            const timingAlgoName = algorithmSelect.value;
+            const timingAlgoPath = allAlgorithmResults[timingAlgoName]?.fullPath || [initialHeadPosition];
+
+            requestAnimationFrame(() => {
+                // Reset all canvases to initial state before animation
+                algorithmOrder.forEach(algoName => {
+                    if (traceCanvasContexts[algoName]) {
+                        const { canvas, ctx } = traceCanvasContexts[algoName];
+                        if (canvas.offsetWidth > 0 && canvas.offsetHeight > 0) {
+                            setupTraceCanvas(canvas, ctx, maxPathSteps, maxCylinder);
+                            drawInitialTracePoint(ctx, initialHeadPosition, maxPathSteps, maxCylinder, canvas.width, canvas.height);
+                        }
+                    }
+                });
+                stepIndividualAnimation(); // Start the recursive animation step
             });
+
+            function stepIndividualAnimation() {
+                // Stop condition: Animated all segments OR reset button pressed
+                if (currentAnimationPathStep >= totalSegmentsToAnimate || !isAnimatingIndividual) {
+                    console.log("Individual trace animation complete or stopped.");
+                    isAnimatingIndividual = false;
+                    if (!isAnimatingAllInOne) { // Only re-enable UI if combined isn't running
+                        disableUI(false);
+                        startButton.innerHTML = '<span class="lucide"></span> Animate Individual Traces';
+                    }
+                    if (currentAnimationPathStep >= totalSegmentsToAnimate) showMessage("Animation complete.");
+                    clearTimeout(animationTimeout); // Clear any pending timeout
+                    return;
+                }
+
+                const drawingStepIndex = currentAnimationPathStep + 1; // The index of the point we are drawing *to*
+                let stepMovementForTiming = 0;
+
+                // Calculate movement for the current step based on the *timing* algorithm's path
+                if (drawingStepIndex < timingAlgoPath.length) {
+                    stepMovementForTiming = Math.abs(timingAlgoPath[drawingStepIndex] - timingAlgoPath[drawingStepIndex - 1]);
+                } else {
+                    // If the timing algo path is shorter, use a default small delay? Or stop?
+                    // For now, let's use a minimal delay if timing path is exhausted but others might continue
+                    stepMovementForTiming = 1; // Minimal movement equivalent
+                }
+
+
+                requestAnimationFrame(() => {
+                    if (!isAnimatingIndividual) return; // Check again in case reset was pressed during frame request
+
+                    // Draw the segment for EACH algorithm that has a point at this step
+                    algorithmOrder.forEach(algoName => {
+                        const result = allAlgorithmResults[algoName];
+                        const path = result?.fullPath;
+                        const isService = result?.isServiceStop; // Get the service stop flags
+                        const contextInfo = traceCanvasContexts[algoName];
+
+                        // Check if this algorithm has a point at this drawingStepIndex
+                        if (path && isService && contextInfo && drawingStepIndex < path.length) {
+                            const { canvas, ctx } = contextInfo;
+                            if (canvas.width > 0 && canvas.height > 0) {
+                                const currentTrack = path[drawingStepIndex];
+                                const prevTrack = path[drawingStepIndex - 1];
+                                const isEndPointService = isService[drawingStepIndex]; // Check if the END point is a service stop
+
+                                // Draw using maxPathSteps for scaling, pass the service flag
+                                drawTraceSegment(ctx, drawingStepIndex, prevTrack, currentTrack, maxPathSteps, maxCylinder, canvas.width, canvas.height, isEndPointService);
+                            }
+                        }
+                    });
+
+                    currentAnimationPathStep++; // Move to the next segment
+
+                    // Calculate delay for the next step
+                    let stepDuration = Math.max(MIN_STEP_DURATION, stepMovementForTiming * msPerUnitMovement);
+                    stepDuration = Math.min(stepDuration, MAX_STEP_DURATION); // Clamp duration
+
+                    // Schedule the next step
+                    animationTimeout = setTimeout(stepIndividualAnimation, stepDuration);
+                });
+            }
+        }
+
+
+        // --- Drawing Functions (All-in-One Combined Plot) ---
+        function setupAllInOneCanvas(maxTotalPathSteps, maxCylValue) {
+            const canvas = allInOneCanvas; const ctx = allInOneCtx; const currentWidth = canvas.offsetWidth; const currentHeight = canvas.offsetHeight;
+            if (currentWidth > 0 && currentHeight > 0) { canvas.width = currentWidth; canvas.height = currentHeight; ctx.fillStyle = AIO_BG_COLOR; ctx.fillRect(0, 0, canvas.width, canvas.height); drawAllInOneAxes(ctx, canvas.width, canvas.height, maxTotalPathSteps, maxCylValue); } else { console.warn("All-in-one canvas dimensions not available for setup."); }
+        }
+        function drawAllInOneAxes(ctx, width, height, maxSteps, maxCyl) {
+            ctx.save(); ctx.strokeStyle = AIO_AXIS_COLOR; ctx.fillStyle = AIO_LABEL_COLOR; ctx.lineWidth = 1; ctx.font = '11px Inter, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            const plotWidth = width - 2 * AIO_PADDING; const plotHeight = height - 2 * AIO_PADDING;
+            // Draw X-axis (Cylinders) at the top
+            ctx.beginPath(); ctx.moveTo(AIO_PADDING, AIO_PADDING); ctx.lineTo(width - AIO_PADDING, AIO_PADDING); ctx.stroke();
+            const numXTicks = Math.min(10, Math.floor(plotWidth / 60)); ctx.textBaseline = 'bottom';
+            for (let i = 0; i <= numXTicks; i++) { const cylinder = Math.round((i / numXTicks) * maxCyl); const x = mapToAllInOneCanvas(0, cylinder, maxSteps, maxCyl, width, height).x; const yPos = AIO_PADDING; ctx.beginPath(); ctx.moveTo(x, yPos); ctx.lineTo(x, yPos - 5); ctx.stroke(); ctx.fillText(cylinder, x, yPos - 8); }
+            // Draw Y-axis (Path Steps) on the left - No need to draw axis line again if bg fills canvas
+            // Draw grid lines and Y labels
+            ctx.strokeStyle = AIO_GRID_COLOR; ctx.lineWidth = 0.5; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+            const yLabelInterval = Math.max(1, Math.ceil((maxSteps > 1 ? maxSteps - 1 : 1) / 10)); // Label every ~10 steps
+            for (let i = 1; i < maxSteps; i++) { // Start grid from step 1 line
+                const y = mapToAllInOneCanvas(i, 0, maxSteps, maxCyl, width, height).y;
+                // Draw horizontal grid line
+                ctx.beginPath(); ctx.moveTo(AIO_PADDING, y); ctx.lineTo(width - AIO_PADDING, y); ctx.stroke();
+                // Draw Y-axis label if interval matches
+                if (i > 0 && (i % yLabelInterval === 0 || i === maxSteps - 1)) {
+                    ctx.fillStyle = AIO_LABEL_COLOR;
+                    ctx.fillText(i, AIO_PADDING - 12, y);
+                }
+            }
+            ctx.restore();
+        }
+        function mapToAllInOneCanvas(stepIndex, cylinder, maxTotalPathSteps, maxCyl, canvasWidth, canvasHeight) {
+            const plotWidth = canvasWidth - 2 * AIO_PADDING; const plotHeight = canvasHeight - 2 * AIO_PADDING; const x = AIO_PADDING + (cylinder / Math.max(1, maxCyl)) * plotWidth;
+            // Ensure yFactor doesn't divide by zero if maxTotalPathSteps is 1 (only start point)
+            const yFactor = (maxTotalPathSteps <= 1) ? 0 : stepIndex / (maxTotalPathSteps - 1);
+            const y = AIO_PADDING + yFactor * plotHeight;
+            // Clamp values to stay within plot area
+            return {
+                x: Math.max(AIO_PADDING, Math.min(canvasWidth - AIO_PADDING, x)),
+                y: Math.max(AIO_PADDING, Math.min(canvasHeight - AIO_PADDING, y))
+            };
+        }
+        function drawAllInOneInitialPoint(cylinder, maxTotalPathSteps, maxCyl) {
+            if (allInOneCanvas.width <= 0 || allInOneCanvas.height <= 0) return;
+            const { x, y } = mapToAllInOneCanvas(0, cylinder, maxTotalPathSteps, maxCyl, allInOneCanvas.width, allInOneCanvas.height); // Step index is 0
+            const ctx = allInOneCtx; ctx.save();
+            // Draw a distinct starting point marker
+            ctx.fillStyle = AIO_START_POINT_COLOR; // White/light color
+            ctx.strokeStyle = AIO_AXIS_COLOR; // Outline matching axes
+            ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.arc(x, y, AIO_POINT_RADIUS + 1, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+            // Label the starting cylinder number
+            ctx.fillStyle = AIO_LABEL_COLOR; ctx.font = 'bold 10px Inter, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+            ctx.fillText(`${cylinder}`, x, y - AIO_POINT_RADIUS - 4); // Label above the point
+            ctx.restore();
+        }
+
+        // **MODIFIED drawAllInOneSegment** to accept isServiceEndPoint and draw dashed lines
+        function drawAllInOneSegment(ctx, stepIndex, prevCylinder, currentCylinder, maxTotalPathSteps, maxCyl, width, height, baseColor, isServiceEndPoint) {
+            if (width <= 0 || height <= 0 || stepIndex === 0) return; // Cannot draw segment from step 0
+
+            const startPoint = mapToAllInOneCanvas(stepIndex - 1, prevCylinder, maxTotalPathSteps, maxCyl, width, height);
+            const endPoint = mapToAllInOneCanvas(stepIndex, currentCylinder, maxTotalPathSteps, maxCyl, width, height);
+
+            // Calculate colors with alpha
+            const strokeColor = hexToRgba(baseColor, AIO_ALPHA);
+            const fillColor = hexToRgba(baseColor, Math.min(1, AIO_ALPHA + 0.15)); // Point fill slightly more opaque
+
+            ctx.save();
+            ctx.lineWidth = AIO_LINE_WIDTH;
+
+            // Set line style based on whether the ENDPOINT is a service stop
+            if (isServiceEndPoint) {
+                ctx.setLineDash([]); // Solid line for segments ending in a service
+                ctx.strokeStyle = strokeColor;
+            } else {
+                ctx.setLineDash(DASH_PATTERN); // Dashed line for non-servicing moves (boundaries, jumps)
+                // Optional: Make dashed lines slightly fainter
+                ctx.strokeStyle = hexToRgba(baseColor, AIO_ALPHA * 0.8);
+            }
+
+            // Draw line segment
+            ctx.beginPath(); ctx.moveTo(startPoint.x, startPoint.y); ctx.lineTo(endPoint.x, endPoint.y); ctx.stroke();
+
+            // Reset dash pattern before drawing the point
+            ctx.setLineDash([]);
+
+            // Draw endpoint circle (always solid fill, color indicates algorithm)
+            ctx.fillStyle = fillColor;
+            ctx.beginPath(); ctx.arc(endPoint.x, endPoint.y, AIO_POINT_RADIUS, 0, Math.PI * 2); ctx.fill();
+            ctx.restore();
+        }
+
+
+        // --- Animation Control (All-in-One Combined Plot) ---
+        function animateAllInOne() {
+            if (isAnimatingIndividual || isAnimatingAllInOne) return;
+            if (currentRequests.length === 0) { showMessage("No requests to animate."); return; }
+            if (maxPathSteps <= 1 && currentRequests.length > 0) { showMessage("Error during calculation (maxPathSteps <= 1), cannot animate. Please Update & Reset.", true); return; }
+
+            console.log("Starting combined animation...");
+            isAnimatingAllInOne = true;
+            disableUI(true);
+            animateCombinedButton.innerHTML = '<span class="lucide"></span> Animating Combined...';
+            showMessage("Combined animation running...");
+
+            requestAnimationFrame(() => {
+                // Ensure canvas is ready
+                if (allInOneCanvas.offsetWidth <= 0 || allInOneCanvas.offsetHeight <= 0) {
+                    console.error("All-in-one canvas not ready for animation.");
+                    showMessage("Error: Canvas not ready. Please try again.", true);
+                    isAnimatingAllInOne = false;
+                    disableUI(false);
+                    animateCombinedButton.innerHTML = '<span class="lucide"></span> Animate Combined Plot';
+                    return;
+                }
+                // Reset canvas to initial state
+                setupAllInOneCanvas(maxPathSteps, maxCylinder);
+                drawAllInOneInitialPoint(initialHeadPosition, maxPathSteps, maxCylinder);
+
+                let animationStates = [];
+                // Base timing on the maximum total movement across algorithms for relative speed scaling
+                const maxTotalMovement = Math.max(1, ...Object.values(allAlgorithmResults).map(r => r.totalMovement));
+
+                algorithmOrder.forEach(algoName => {
+                    const result = allAlgorithmResults[algoName];
+                    if (result && result.fullPath && result.isServiceStop) { // Ensure path and flags exist
+                        const algoMovement = result.totalMovement;
+                        // Calculate speed factor: faster for less movement
+                        const speedFactor = Math.max(0.1, (maxTotalMovement + 1) / (algoMovement + 1)); // Avoid zero/negative factor
+                        const timePerUnit = AIO_BASE_TIME_SCALE / speedFactor; // Time per unit moved
+
+                        animationStates.push({
+                            name: algoName,
+                            path: result.fullPath,
+                            isService: result.isServiceStop, // Store the service flags for this algo
+                            color: ALGO_COLORS[algoName],
+                            currentStepIndex: 0, // Index of the *point* we are currently at (start at 0)
+                            finished: result.fullPath.length <= 1, // Already finished if only start point
+                            timeAccumulator: 0, // Time elapsed since last step draw
+                            timePerUnit: timePerUnit, // Calculated time per unit distance for this algo
+                        });
+                    }
+                });
+
+                let lastTimestamp = 0;
+                let allDone = false;
+
+                function allInOneStepLoop(timestamp) {
+                    if (!isAnimatingAllInOne) { // Check if stopped externally
+                        cancelAnimationFrame(allInOneAnimationId);
+                        return;
+                    }
+                    if (lastTimestamp === 0) lastTimestamp = timestamp;
+                    const deltaTime = timestamp - lastTimestamp; // Time since last frame
+                    lastTimestamp = timestamp;
+                    allDone = true; // Assume finished until proven otherwise
+
+                    // Update state and draw for each algorithm
+                    animationStates.forEach(state => {
+                        // Skip if this algo's path is finished
+                        if (state.finished || state.currentStepIndex >= state.path.length - 1) {
+                            state.finished = true;
+                            return; // Move to next algorithm state
+                        }
+
+                        allDone = false; // At least one algo is still running
+                        state.timeAccumulator += deltaTime; // Add time elapsed
+
+                        // Determine the next point in the path to draw *to*
+                        const drawingStepIndex = state.currentStepIndex + 1;
+                        const targetPos = state.path[drawingStepIndex];
+                        const prevPos = state.path[state.currentStepIndex]; // Corrected: previous point is currentStepIndex
+                        const stepMove = Math.abs(targetPos - prevPos);
+                        // Time required for this specific step based on distance and algo's speed
+                        const stepDurationNeeded = Math.max(MIN_STEP_DURATION * 0.5, stepMove * state.timePerUnit); // Use a fraction of min duration for faster algos
+
+                        // If enough time has passed, draw the segment and advance the state
+                        if (state.timeAccumulator >= stepDurationNeeded) {
+                            const isEndPointService = state.isService[drawingStepIndex]; // Get service flag for the target point
+
+                            // Draw the segment from prevPos to targetPos
+                            drawAllInOneSegment(allInOneCtx, drawingStepIndex, prevPos, targetPos,
+                                maxPathSteps, maxCylinder, allInOneCanvas.width, allInOneCanvas.height,
+                                state.color, isEndPointService); // Pass service flag
+
+                            state.currentStepIndex++; // Advance to the next point
+                            state.timeAccumulator = Math.max(0, state.timeAccumulator - stepDurationNeeded); // Subtract used time, keep remainder
+
+                            // Check if this algo just finished its path
+                            if (state.currentStepIndex >= state.path.length - 1) {
+                                state.finished = true;
+                            }
+                        }
+                    });
+
+                    // Request next frame if not all algorithms are finished
+                    if (allDone) {
+                        console.log("Combined animation complete.");
+                        isAnimatingAllInOne = false;
+                        if (!isAnimatingIndividual) { // Only re-enable UI if individual isn't running
+                            disableUI(false);
+                            animateCombinedButton.innerHTML = '<span class="lucide"></span> Animate Combined Plot';
+                        }
+                        showMessage("Combined animation complete.");
+                        cancelAnimationFrame(allInOneAnimationId); // Explicitly cancel frame loop
+                    } else {
+                        allInOneAnimationId = requestAnimationFrame(allInOneStepLoop); // Continue animation
+                    }
+                }
+                // Start the animation loop
+                allInOneAnimationId = requestAnimationFrame(allInOneStepLoop);
+            });
+        }
+
+
+        // --- Comparison Graph Drawing ---
+        function drawComparisonGraph() {
+            const canvas = comparisonCanvas; const ctx = comparisonCtx; const availableWidth = canvas.offsetWidth; const availableHeight = canvas.offsetHeight;
+            if (availableWidth <= 0 || availableHeight <= 0) { requestAnimationFrame(drawComparisonGraph); return; } // Defer if not visible
+            canvas.width = availableWidth; canvas.height = availableHeight; ctx.clearRect(0, 0, canvas.width, canvas.height);
+            let data = []; let maxValue = 0; let yAxisLabel = ""; let valueFormatPrecision = 0;
+            // Prepare data based on the selected metric
+            switch (currentComparisonMetric) {
+                case 'movement': yAxisLabel = "Total Head Movement"; valueFormatPrecision = 0; algorithmOrder.forEach(algoName => { const value = allAlgorithmResults[algoName]?.totalMovement ?? 0; data.push({ label: algoName, value: value }); maxValue = Math.max(maxValue, value); }); break;
+                case 'avgSeek': yAxisLabel = "Avg Seek Time (per Request)"; valueFormatPrecision = 2; algorithmOrder.forEach(algoName => { const value = allAlgorithmResults[algoName]?.avgSeekTime ?? 0; data.push({ label: algoName, value: value }); maxValue = Math.max(maxValue, value); }); break;
+                case 'throughput': yAxisLabel = "Throughput (Reqs / Movement)"; valueFormatPrecision = 4; algorithmOrder.forEach(algoName => { const value = allAlgorithmResults[algoName]?.throughput ?? 0; if (isFinite(value)) { data.push({ label: algoName, value: value }); maxValue = Math.max(maxValue, value); } else { data.push({ label: algoName, value: 0, display: "Inf" }); } }); break; // Handle potential Infinity
+            }
+            if (maxValue === 0 && data.every(d => d.value === 0)) maxValue = (currentComparisonMetric === 'throughput' ? 1 : 10); // Default max if all values are 0
+            maxValue *= 1.1; // Add padding to max value for scale
+            const plotWidth = canvas.width - 2 * COMP_PADDING; const plotHeight = canvas.height - 2 * COMP_PADDING; const barTotalSpace = plotWidth / data.length; const barSpacing = barTotalSpace * 0.2; const barWidth = barTotalSpace * 0.8;
+            // Draw Axes and Grid
+            ctx.save(); ctx.strokeStyle = COMP_AXIS_COLOR; ctx.lineWidth = 1; ctx.font = '11px Inter, sans-serif';
+            ctx.beginPath(); ctx.moveTo(COMP_PADDING, COMP_PADDING); ctx.lineTo(COMP_PADDING, canvas.height - COMP_PADDING); ctx.stroke(); // Y-Axis
+            ctx.beginPath(); ctx.moveTo(COMP_PADDING, canvas.height - COMP_PADDING); ctx.lineTo(canvas.width - COMP_PADDING, canvas.height - COMP_PADDING); ctx.stroke(); // X-Axis
+            const numYTicks = 5; ctx.fillStyle = COMP_LABEL_COLOR; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+            for (let i = 0; i <= numYTicks; i++) {
+                const value = (maxValue / numYTicks) * i; const yValueRatio = maxValue === 0 ? 0 : (value / maxValue); const y = canvas.height - COMP_PADDING - yValueRatio * plotHeight; ctx.fillText(value.toFixed(valueFormatPrecision), COMP_PADDING - 10, y); // Y-Axis Labels
+                ctx.strokeStyle = COMP_GRID_COLOR; ctx.lineWidth = 0.5; ctx.beginPath(); ctx.moveTo(COMP_PADDING + 1, y); ctx.lineTo(canvas.width - COMP_PADDING, y); ctx.stroke();
+            } // Horizontal Grid Lines
+            // Draw Y-Axis Title
+            ctx.save(); ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.fillStyle = COMP_LABEL_COLOR; ctx.font = '12px Inter, sans-serif'; ctx.translate(COMP_PADDING * 0.4, canvas.height / 2); ctx.rotate(-Math.PI / 2); ctx.fillText(yAxisLabel, 0, 0); ctx.restore();
+            // Draw Bars and Labels
+            data.forEach((item, index) => {
+                const x = COMP_PADDING + barSpacing / 2 + index * barTotalSpace; const barHeightRatio = maxValue === 0 ? 0 : (item.value / maxValue); const barHeight = Math.max(1, barHeightRatio * plotHeight); // Ensure min height of 1px
+                const y = canvas.height - COMP_PADDING - barHeight; ctx.fillStyle = COMP_BAR_COLOR; ctx.fillRect(x, y, barWidth, barHeight); // Draw Bar
+                ctx.fillStyle = COMP_LABEL_COLOR; ctx.font = '11px Inter, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'top'; const barCenterX = x + barWidth / 2; ctx.fillText(item.label, barCenterX, canvas.height - COMP_PADDING + 6); // X-Axis Label (Algo Name)
+                ctx.fillStyle = COMP_BAR_VALUE_COLOR; ctx.font = '10px Inter, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+                // Display "Inf" for throughput if needed, otherwise format number
+                const displayValue = item.display ? item.display : item.value.toFixed(valueFormatPrecision);
+                ctx.fillText(displayValue, barCenterX, y - 4);
+            }); // Bar Value Label
+            ctx.restore();
         }
 
         // --- Populate Comparison Table ---
         function populateComparisonTable() {
-            comparisonTableBody.innerHTML = ''; // Clear existing rows
-
-            algorithmOrder.forEach(algoName => {
-                const result = allAlgorithmResults[algoName];
-                if (!result) return; // Skip if results aren't calculated
-
-                const row = comparisonTableBody.insertRow();
-
-                const cellAlgo = row.insertCell();
-                cellAlgo.textContent = algoName;
-
-                const cellMovement = row.insertCell();
-                cellMovement.textContent = result.totalMovement.toFixed(0);
-
-                const cellAvgSeek = row.insertCell();
-                cellAvgSeek.textContent = result.avgSeekTime.toFixed(2);
-
-                const cellThroughput = row.insertCell();
-                cellThroughput.textContent = result.throughput.toFixed(4);
-
-                // Apply right-align class to number cells (can also be done via CSS)
-                cellMovement.style.textAlign = 'right';
-                cellAvgSeek.style.textAlign = 'right';
-                cellThroughput.style.textAlign = 'right';
-                cellMovement.style.fontFamily = 'monospace';
-                cellAvgSeek.style.fontFamily = 'monospace';
-                cellThroughput.style.fontFamily = 'monospace';
+            comparisonTableBody.innerHTML = ''; if (Object.keys(allAlgorithmResults).length === 0) { const row = comparisonTableBody.insertRow(); const cell = row.insertCell(); cell.colSpan = 4; cell.textContent = "No data available."; cell.style.textAlign = 'center'; cell.style.padding = '1rem'; return; } algorithmOrder.forEach(algoName => {
+                const result = allAlgorithmResults[algoName]; if (!result) return; const row = comparisonTableBody.insertRow(); const cellAlgo = row.insertCell(); cellAlgo.textContent = algoName; const cellMovement = row.insertCell(); cellMovement.textContent = result.totalMovement.toFixed(0); const cellAvgSeek = row.insertCell(); cellAvgSeek.textContent = result.avgSeekTime.toFixed(2); const cellThroughput = row.insertCell();
+                // Format throughput, handling Infinity
+                cellThroughput.textContent = isFinite(result.throughput) ? result.throughput.toFixed(4) : "Inf";
+                cellMovement.style.textAlign = 'right'; cellAvgSeek.style.textAlign = 'right'; cellThroughput.style.textAlign = 'right'; cellMovement.style.fontFamily = "'Roboto Mono', monospace"; cellAvgSeek.style.fontFamily = "'Roboto Mono', monospace"; cellThroughput.style.fontFamily = "'Roboto Mono', monospace";
             });
         }
 
-
         // --- Utility Functions ---
-        function showMessage(msg) { messageBox.textContent = msg; }
+        function showMessage(msg, isError = false) { messageBox.textContent = msg; messageBox.style.color = isError ? '#dc2626' : '#4f46e5'; }
+        function hexToRgba(hex, alpha = 1) { hex = hex.replace('#', ''); let r, g, b; if (hex.length === 3) { r = parseInt(hex.substring(0, 1).repeat(2), 16); g = parseInt(hex.substring(1, 2).repeat(2), 16); b = parseInt(hex.substring(2, 3).repeat(2), 16); } else if (hex.length === 6) { r = parseInt(hex.substring(0, 2), 16); g = parseInt(hex.substring(2, 4), 16); b = parseInt(hex.substring(4, 6), 16); } else { console.warn("Invalid hex color:", hex); return `rgba(100, 100, 100, ${alpha})`; } alpha = Math.max(0, Math.min(1, alpha)); return `rgba(${r}, ${g}, ${b}, ${alpha})`; }
+        function disableUI(disable) {
+            const isDisabled = !!disable; const hasRequests = currentRequests.length > 0; startButton.disabled = isDisabled || !hasRequests || isAnimatingAllInOne; // Disable individual if combined is running
+            animateCombinedButton.disabled = isDisabled || !hasRequests || isAnimatingIndividual; // Disable combined if individual is running
+            resetButton.disabled = isDisabled; updateQueueButton.disabled = isDisabled; algorithmSelect.disabled = isDisabled; startHeadInput.disabled = isDisabled; maxCylinderInput.disabled = isDisabled; requestQueueInput.disabled = isDisabled; animationSpeedSelect.disabled = isDisabled; compareMovementBtn.disabled = isDisabled; compareAvgSeekBtn.disabled = isDisabled; compareThroughputBtn.disabled = isDisabled;
+        }
 
         // --- Event Listeners ---
-        algorithmSelect.addEventListener('change', () => { updateDetailsDisplay(algorithmSelect.value); });
-        startHeadInput.addEventListener('change', () => initializeSimulation(false));
-        maxCylinderInput.addEventListener('change', () => initializeSimulation(false));
-        updateQueueButton.addEventListener('click', () => initializeSimulation(false));
-        requestQueueInput.addEventListener('keypress', (event) => { if (event.key === 'Enter') { initializeSimulation(false); } });
+        algorithmSelect.addEventListener('change', (e) => { if (!isAnimatingIndividual && !isAnimatingAllInOne) updateDetailsDisplay(e.target.value); });
+        // Re-initialize only if not animating
+        startHeadInput.addEventListener('change', () => { if (!isAnimatingIndividual && !isAnimatingAllInOne) initializeSimulation(false); });
+        maxCylinderInput.addEventListener('change', () => { if (!isAnimatingIndividual && !isAnimatingAllInOne) initializeSimulation(false); });
+        updateQueueButton.addEventListener('click', () => { if (!isAnimatingIndividual && !isAnimatingAllInOne) initializeSimulation(false); });
+        requestQueueInput.addEventListener('keypress', (event) => { if (event.key === 'Enter') { event.preventDefault(); if (!isAnimatingIndividual && !isAnimatingAllInOne) initializeSimulation(false); } });
         startButton.addEventListener('click', animateMovement);
-        resetButton.addEventListener('click', () => { initializeSimulation(true); showMessage("Simulation reset to defaults."); });
-
-        // Comparison Metric Button Listeners
+        animateCombinedButton.addEventListener('click', animateAllInOne);
+        resetButton.addEventListener('click', () => {
+            clearTimeout(animationTimeout); cancelAnimationFrame(allInOneAnimationId); isAnimatingIndividual = false; isAnimatingAllInOne = false; initializeSimulation(true); disableUI(currentRequests.length === 0); // Re-enable UI based on whether defaults have requests
+            showMessage("Simulation reset to default values.");
+        });
+        animationSpeedSelect.addEventListener('change', () => { msPerUnitMovement = parseFloat(animationSpeedSelect.value) || 2; });
         function setActiveButton(activeBtnId) { [compareMovementBtn, compareAvgSeekBtn, compareThroughputBtn].forEach(btn => { btn.classList.toggle('active', btn.id === activeBtnId); }); }
-        compareMovementBtn.addEventListener('click', () => { if (currentComparisonMetric !== 'movement') { currentComparisonMetric = 'movement'; setActiveButton('compare-movement-btn'); drawComparisonGraph(); } });
-        compareAvgSeekBtn.addEventListener('click', () => { if (currentComparisonMetric !== 'avgSeek') { currentComparisonMetric = 'avgSeek'; setActiveButton('compare-avg-seek-btn'); drawComparisonGraph(); } });
-        compareThroughputBtn.addEventListener('click', () => { if (currentComparisonMetric !== 'throughput') { currentComparisonMetric = 'throughput'; setActiveButton('compare-throughput-btn'); drawComparisonGraph(); } });
-
-        let resizeTimeout;
-        window.addEventListener('resize', () => { clearTimeout(resizeTimeout); resizeTimeout = setTimeout(() => { if (!isAnimating) { initializeSimulation(false); } }, 250); });
-
-        // --- Initial Load ---
-        initializeSimulation(true);
-
+        compareMovementBtn.addEventListener('click', () => { if (currentComparisonMetric !== 'movement' && !isAnimatingIndividual && !isAnimatingAllInOne) { currentComparisonMetric = 'movement'; setActiveButton('compare-movement-btn'); drawComparisonGraph(); } });
+        compareAvgSeekBtn.addEventListener('click', () => { if (currentComparisonMetric !== 'avgSeek' && !isAnimatingIndividual && !isAnimatingAllInOne) { currentComparisonMetric = 'avgSeek'; setActiveButton('compare-avg-seek-btn'); drawComparisonGraph(); } });
+        compareThroughputBtn.addEventListener('click', () => { if (currentComparisonMetric !== 'throughput' && !isAnimatingIndividual && !isAnimatingAllInOne) { currentComparisonMetric = 'throughput'; setActiveButton('compare-throughput-btn'); drawComparisonGraph(); } });
+        // Debounced resize handler
+        let resizeTimeout; window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout); resizeTimeout = setTimeout(() => {
+                console.log("Window resized..."); if (!isAnimatingIndividual && !isAnimatingAllInOne) {
+                    console.log("Re-drawing layout..."); // Use existing data, redraw plots
+                    // Recalculate max path steps based on current results if needed (should be same)
+                    maxPathSteps = Math.max(1, ...Object.values(allAlgorithmResults).map(r => r.fullPath.length));
+                    // Redraw individual canvases
+                    algorithmOrder.forEach(algoName => {
+                        if (traceCanvasContexts[algoName]) {
+                            const { canvas, ctx } = traceCanvasContexts[algoName]; setupTraceCanvas(canvas, ctx, maxPathSteps, maxCylinder); // Redraw axes etc.
+                            // Redraw the *entire* static path for this algo
+                            const result = allAlgorithmResults[algoName]; if (result && result.fullPath.length > 0) { drawInitialTracePoint(ctx, result.fullPath[0], maxPathSteps, maxCylinder, canvas.width, canvas.height); for (let i = 1; i < result.fullPath.length; i++) { drawTraceSegment(ctx, i, result.fullPath[i - 1], result.fullPath[i], maxPathSteps, maxCylinder, canvas.width, canvas.height, result.isServiceStop[i]); } }
+                        }
+                    });
+                    // Redraw combined canvas
+                    if (allInOneCanvas.offsetWidth > 0 && allInOneCanvas.offsetHeight > 0) {
+                        setupAllInOneCanvas(maxPathSteps, maxCylinder); drawAllInOneInitialPoint(initialHeadPosition, maxPathSteps, maxCylinder); // Redraw all static paths on combined
+                        animationStates.forEach(state => { // If animation was interrupted, redraw static paths
+                            if (state.path.length > 1) { for (let i = 1; i < state.path.length; ++i) { drawAllInOneSegment(allInOneCtx, i, state.path[i - 1], state.path[i], maxPathSteps, maxCylinder, allInOneCanvas.width, allInOneCanvas.height, state.color, state.isService[i]); } }
+                        });
+                    }
+                    // Redraw comparison graph
+                    drawComparisonGraph();
+                } else { console.log("Resize ignored during animation."); showMessage("Please wait for animation to finish before resizing.", true); }
+            }, 250);
+        }); // 250ms debounce time
+        document.addEventListener('DOMContentLoaded', () => { initializeSimulation(true); });
     </script>
 
 </body>
