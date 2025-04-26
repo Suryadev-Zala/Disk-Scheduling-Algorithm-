@@ -2,7 +2,9 @@
 
 # Disk Scheduling Algorithm Implementation (Project P19)
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Language: C++](https://img.shields.io/badge/Language-C%2B%2B-blue.svg)](https://isocpp.org/) ## Overview
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Language: C++](https://img.shields.io/badge/Language-C%2B%2B-blue.svg)](https://isocpp.org/) 
+
+## Overview
 
 This project provides a C++ simulation platform for implementing, evaluating, and comparing various disk scheduling algorithms. Disk I/O operations often represent a significant bottleneck in computing systems due to the mechanical latencies (seek time, rotational latency) of traditional Hard Disk Drives (HDDs). Efficient disk scheduling algorithms aim to mitigate these latencies by intelligently ordering pending I/O requests to minimize inefficient head movements, thereby improving overall system performance and responsiveness.
 
